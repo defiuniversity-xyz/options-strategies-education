@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Options Strategies: Statistical Edge Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --card: #1c2333;
+  --border: #30363d;
+  --accent: #00d9a3;
+  --gold: #f0b429;
+  --red: #f85149;
+  --blue: #58a6ff;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --sidebar-w: 240px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+#sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 100;
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+#sidebar-header {
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+#sidebar-header .logo {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+#sidebar-header .tagline {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+nav { padding: 12px 0; flex: 1; }
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+nav a:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,217,163,0.06); }
+nav .nav-section {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 16px 16px 4px;
+}
+
+/* ── Main content ── */
+#main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Site header ── */
+#site-header {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d2137 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 60px 48px 48px;
+  position: relative;
+  overflow: hidden;
+}
+#site-header::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -10%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(0,217,163,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+#site-header .eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+#site-header h1 {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text);
+  max-width: 700px;
+}
+#site-header h1 span { color: var(--accent); }
+#site-header .subtitle {
+  margin-top: 16px;
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 600px;
+  line-height: 1.7;
+}
+.header-stats {
+  display: flex;
+  gap: 32px;
+  margin-top: 36px;
+  flex-wrap: wrap;
+}
+.header-stat { text-align: center; }
+.header-stat .num {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent);
+}
+.header-stat .lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* ── Sections ── */
+.strategy-section {
+  padding: 64px 48px;
+  border-bottom: 1px solid var(--border);
+}
+.strategy-section:last-of-type { border-bottom: none; }
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.section-title {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 800;
+  color: var(--text);
+  padding-left: 16px;
+  border-left: 4px solid var(--accent);
+  line-height: 1.25;
+  margin-bottom: 20px;
+}
+.section-intro {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 780px;
+  line-height: 1.75;
+  margin-bottom: 28px;
+}
+
+/* ── Badge strip ── */
+.badge-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-label { font-weight: 400; color: var(--text-muted); margin-right: 2px; }
+.badge-green { background: rgba(0,217,163,0.12); border: 1px solid rgba(0,217,163,0.3); color: var(--accent); }
+.badge-gold { background: rgba(240,180,41,0.12); border: 1px solid rgba(240,180,41,0.3); color: var(--gold); }
+.badge-blue { background: rgba(88,166,255,0.12); border: 1px solid rgba(88,166,255,0.3); color: var(--blue); }
+.badge-red { background: rgba(248,81,73,0.12); border: 1px solid rgba(248,81,73,0.3); color: var(--red); }
+.badge-purple { background: rgba(188,140,255,0.12); border: 1px solid rgba(188,140,255,0.3); color: #bc8cff; }
+
+/* ── Payoff diagram ── */
+.diagram-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 16px 8px;
+  margin-bottom: 32px;
+}
+.diagram-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.diagram-wrap svg { width: 100%; display: block; }
+
+/* ── Tabs ── */
+.tabs { margin-bottom: 24px; }
+.tab-buttons {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tab-buttons::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 10px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-panel { display: none; padding: 24px 0 0; }
+.tab-panel.active { display: block; }
+.tab-panel ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tab-panel ul li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.tab-panel ul li::before {
+  content: '▸';
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.tab-panel p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  margin-bottom: 12px;
+}
+.tab-panel strong { color: var(--text); }
+
+/* ── Stat cards ── */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.stat-card .num {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1.1;
+}
+.stat-card .num.gold { color: var(--gold); }
+.stat-card .num.red { color: var(--red); }
+.stat-card .num.blue { color: var(--blue); }
+.stat-card .lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ── Content grid for two-column layouts ── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 20px;
+}
+.content-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+.content-card h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.content-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.content-card ul li {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+.content-card ul li::before {
+  content: '▸';
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Highlight box ── */
+.highlight-box {
+  background: rgba(0,217,163,0.06);
+  border: 1px solid rgba(0,217,163,0.2);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.highlight-box strong { color: var(--accent); }
+
+.warning-box {
+  background: rgba(248,81,73,0.06);
+  border: 1px solid rgba(248,81,73,0.2);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.warning-box strong { color: var(--red); }
+
+/* ── Comparison Matrix table ── */
+.matrix-wrap {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-top: 8px;
+}
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 900px;
+}
+.matrix-table thead th {
+  background: var(--card);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+.matrix-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.matrix-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+.matrix-table tbody td { padding: 11px 14px; color: var(--text-muted); vertical-align: middle; }
+.matrix-table tbody td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+.cell-green { background: rgba(0,217,163,0.08); color: var(--accent) !important; }
+.cell-yellow { background: rgba(240,180,41,0.08); color: var(--gold) !important; }
+.cell-blue { background: rgba(88,166,255,0.08); color: var(--blue) !important; }
+.cell-red { background: rgba(248,81,73,0.08); color: var(--red) !important; }
+
+/* ── Hamburger ── */
+#hamburger {
+  display: none;
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 4px;
+}
+#hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+}
+#overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 90;
+}
+
+/* ── Foundations cards ── */
+.foundations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+.foundation-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+.foundation-card .icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+.foundation-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.foundation-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+.vrp-visual {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 10px;
+}
+.vrp-bar-wrap { flex: 1; }
+.vrp-bar-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.vrp-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border);
+  overflow: hidden;
+}
+.vrp-bar-fill { height: 100%; border-radius: 4px; }
+
+/* ── Margin frameworks ── */
+.margin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 8px;
+}
+.margin-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+.margin-card h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.margin-card .subtitle-sm {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.margin-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.margin-card ul li {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 8px;
+  line-height: 1.5;
+}
+.margin-card ul li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+.margin-card.pm { border-color: rgba(0,217,163,0.3); }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  #hamburger { display: flex; }
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #overlay.open { display: block; }
+  #main { margin-left: 0; }
+  .strategy-section { padding: 40px 20px; }
+  #site-header { padding: 60px 20px 36px; }
+  .content-grid { grid-template-columns: 1fr; }
+  .margin-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .header-stats { gap: 20px; }
+  .tab-btn { padding: 10px 12px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<!-- Hamburger -->
+<button id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+  <span></span><span></span><span></span>
+</button>
+<div id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar">
+  <div id="sidebar-header">
+    <div class="logo">Options Strategies</div>
+    <div class="tagline">Statistical Edge Analysis</div>
+  </div>
+  <nav>
+    <div class="nav-section">Overview</div>
+    <a href="#site-header" data-section="site-header">Introduction</a>
+    <a href="#foundations" data-section="foundations">Foundations</a>
+    <div class="nav-section">Strategies</div>
+    <a href="#strangles" data-section="strangles">Short Strangles / Straddles</a>
+    <a href="#jade-lizard" data-section="jade-lizard">Jade Lizard</a>
+    <a href="#iron-condor" data-section="iron-condor">Iron Condor / Butterfly</a>
+    <a href="#bwb" data-section="bwb">Broken Wing Butterfly</a>
+    <a href="#calendars" data-section="calendars">Calendar / Diagonal</a>
+    <a href="#naked-puts" data-section="naked-puts">Naked Puts</a>
+    <div class="nav-section">Reference</div>
+    <a href="#margins" data-section="margins">Margin Frameworks</a>
+    <a href="#matrix" data-section="matrix">Strategy Matrix</a>
+  </nav>
+</aside>
+
+<!-- Main -->
+<div id="main">
+
+<!-- ══════════════════════════════ SITE HEADER ══════════════════════════════ -->
+<header id="site-header">
+  <div class="eyebrow">Quantitative Options Education</div>
+  <h1>Options Strategies:<br><span>Statistical Edge Analysis</span></h1>
+  <p class="subtitle">A rigorous breakdown of systematic options trading strategies designed to harvest the Volatility Risk Premium, theta decay, and implied volatility mean reversion — backed by decades of empirical research.</p>
+  <div class="header-stats">
+    <div class="header-stat"><div class="num">4.2pp</div><div class="lbl">Persistent VRP (1990–2018)</div></div>
+    <div class="header-stat"><div class="num">8</div><div class="lbl">Strategies Covered</div></div>
+    <div class="header-stat"><div class="num">35yr</div><div class="lbl">CNDR Index Study</div></div>
+    <div class="header-stat"><div class="num">0.65</div><div class="lbl">PUT Index Sharpe Ratio</div></div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════ FOUNDATIONS ══════════════════════════════ -->
+<section class="strategy-section" id="foundations">
+  <div class="section-label">The Foundation</div>
+  <h2 class="section-title">Theoretical Basis of Options Alpha</h2>
+  <p class="section-intro">Systematic options trading exploits three persistent structural anomalies in financial markets: the Volatility Risk Premium, the non-linear acceleration of theta decay, and the mean-reverting nature of implied volatility. Understanding these mechanics is the prerequisite for every strategy that follows.</p>
+
+  <div class="foundations-grid">
+    <!-- VRP Card -->
+    <div class="foundation-card">
+      <div class="icon">📊</div>
+      <h3>Volatility Risk Premium (VRP)</h3>
+      <p>Option implied volatility <strong>systematically overstates</strong> subsequent realized volatility. Options function as financial insurance — buyers consistently pay above fair value to hedge tail risk, creating a persistent structural premium for sellers.</p>
+      <div class="vrp-visual">
+        <div class="vrp-bar-wrap">
+          <div class="vrp-bar-label">Implied Volatility (VIX avg)</div>
+          <div class="vrp-bar"><div class="vrp-bar-fill" style="width:100%;background:var(--gold)"></div></div>
+        </div>
+        <div style="font-size:22px;font-weight:800;color:var(--gold);min-width:42px;text-align:right">19.3%</div>
+      </div>
+      <div class="vrp-visual" style="margin-top:8px">
+        <div class="vrp-bar-wrap">
+          <div class="vrp-bar-label">Realized Volatility (S&amp;P 500 avg)</div>
+          <div class="vrp-bar"><div class="vrp-bar-fill" style="width:78%;background:var(--accent)"></div></div>
+        </div>
+        <div style="font-size:22px;font-weight:800;color:var(--accent);min-width:42px;text-align:right">15.1%</div>
+      </div>
+      <div class="highlight-box" style="margin-top:12px">
+        <strong>4.2 percentage point</strong> persistent VRP documented from 1990–2018. Deep OTM calls return <strong>−73 basis points/day</strong> for buyers on average.
+      </div>
+    </div>
+
+    <!-- Theta Decay Card -->
+    <div class="foundation-card">
+      <div class="icon">⏳</div>
+      <h3>Theta Decay Acceleration</h3>
+      <p>Option premiums consist of intrinsic and extrinsic value. Extrinsic value erodes to zero at expiration along a <strong>non-linear, accelerating curve</strong> — not linearly. The zone between 45 and 21 DTE captures the steepest decay per dollar at risk.</p>
+      <svg viewBox="0 0 280 100" style="width:100%;margin:12px 0">
+        <defs>
+          <linearGradient id="theta-grad" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stop-color="#f0b429" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#f85149" stop-opacity="0.3"/>
+          </linearGradient>
+        </defs>
+        <path d="M 20,15 Q 80,18 130,30 Q 180,50 210,70 Q 240,88 260,95" stroke="var(--gold)" stroke-width="2.5" fill="none"/>
+        <line x1="110" y1="10" x2="110" y2="98" stroke="rgba(0,217,163,0.4)" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="160" y1="10" x2="160" y2="98" stroke="rgba(248,81,73,0.4)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="65" y="9" fill="#8b949e" font-size="8" font-family="Inter">Slow decay</text>
+        <text x="112" y="9" fill="#00d9a3" font-size="8" font-family="Inter">45 DTE</text>
+        <text x="162" y="9" fill="#f85149" font-size="8" font-family="Inter">21 DTE</text>
+        <text x="200" y="9" fill="#8b949e" font-size="8" font-family="Inter">Fast decay</text>
+        <text x="8" y="55" fill="#8b949e" font-size="8" font-family="Inter" writing-mode="vertical-rl" text-anchor="middle">Extrinsic Value</text>
+      </svg>
+      <div class="stat-cards" style="grid-template-columns:1fr 1fr;gap:10px">
+        <div class="stat-card"><div class="num">45</div><div class="lbl">Optimal entry DTE</div></div>
+        <div class="stat-card"><div class="num">21</div><div class="lbl">Management DTE</div></div>
+      </div>
+    </div>
+
+    <!-- Mean Reversion Card -->
+    <div class="foundation-card">
+      <div class="icon">🔄</div>
+      <h3>IV Mean Reversion</h3>
+      <p>Implied volatility is a <strong>bounded metric</strong> — unlike equity prices, volatility cannot rise to infinity or fall below zero. Periods of extreme IV expansion are predictably followed by contraction ("IV crush"), generating alpha even if the underlying is stationary.</p>
+      <p>The <strong>IV Rank (IVR)</strong> measures current IV as a percentile of its 52-week range, providing a normalized signal for when conditions favor short-premium strategies.</p>
+      <div class="stat-cards" style="grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+        <div class="stat-card"><div class="num" style="color:var(--red)">IVR&gt;50</div><div class="lbl">Short premium environment</div></div>
+        <div class="stat-card"><div class="num" style="color:var(--blue)">IVR&lt;25</div><div class="lbl">Long vega / calendar environment</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SHORT STRANGLES & STRADDLES ═══════════════════════ -->
+<section class="strategy-section" id="strangles">
+  <div class="section-label">Strategy 01</div>
+  <h2 class="section-title">Short Strangles &amp; Short Straddles</h2>
+  <p class="section-intro">The purest structural forms of short-volatility, non-directional trading. Designed to harvest the Volatility Risk Premium and theta decay while maintaining a delta-neutral posture at entry.</p>
+
+  <div class="badge-strip">
+    <span class="badge badge-green"><span class="badge-label">Win Rate:</span>~68–80%</span>
+    <span class="badge badge-gold"><span class="badge-label">IV Env:</span>High (IVR &gt; 50)</span>
+    <span class="badge badge-blue"><span class="badge-label">Delta Bias:</span>Neutral</span>
+    <span class="badge badge-purple"><span class="badge-label">Primary Edge:</span>VRP + Theta Decay</span>
+    <span class="badge badge-red"><span class="badge-label">Risk:</span>Undefined Both Sides</span>
+  </div>
+
+  <!-- SVG Payoff -->
+  <div class="diagram-wrap">
+    <div class="diagram-title">Payoff at Expiration — Short Strangle</div>
+    <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background -->
+      <rect width="600" height="180" fill="transparent"/>
+      <!-- Zero line -->
+      <line x1="30" y1="90" x2="580" y2="90" stroke="#30363d" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- Loss zones fill -->
+      <polygon points="30,170 30,90 160,90 200,60 200,60 30,60" fill="rgba(248,81,73,0.10)"/>
+      <polygon points="400,60 440,60 440,90 580,90 580,170 400,170" fill="rgba(248,81,73,0.10)"/>
+      <!-- Profit zone fill -->
+      <polygon points="200,60 200,60 400,60 400,90 200,90" fill="rgba(0,217,163,0.12)"/>
+      <!-- Payoff line: loss left, flat profit, loss right -->
+      <polyline points="30,165 160,100 200,60 400,60 440,100 580,165" stroke-width="2.5" fill="none"
+        stroke="url(#strangle-grad)"/>
+      <defs>
+        <linearGradient id="strangle-grad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#f85149"/>
+          <stop offset="28%" stop-color="#f85149"/>
+          <stop offset="35%" stop-color="#00d9a3"/>
+          <stop offset="65%" stop-color="#00d9a3"/>
+          <stop offset="72%" stop-color="#f85149"/>
+          <stop offset="100%" stop-color="#f85149"/>
+        </linearGradient>
+      </defs>
+      <!-- Strike lines -->
+      <line x1="200" y1="55" x2="200" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="400" y1="55" x2="400" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- Labels -->
+      <text x="200" y="48" fill="#8b949e" font-size="10" font-family="Inter" text-anchor="middle">Short Put</text>
+      <text x="400" y="48" fill="#8b949e" font-size="10" font-family="Inter" text-anchor="middle">Short Call</text>
+      <text x="300" y="53" fill="#00d9a3" font-size="10" font-family="Inter" text-anchor="middle" font-weight="600">Max Profit Zone</text>
+      <text x="75" y="125" fill="#f85149" font-size="10" font-family="Inter" text-anchor="middle">Undefined Loss</text>
+      <text x="520" y="125" fill="#f85149" font-size="10" font-family="Inter" text-anchor="middle">Undefined Loss</text>
+      <!-- Axis labels -->
+      <text x="580" y="88" fill="#8b949e" font-size="9" font-family="Inter">0</text>
+      <text x="300" y="175" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Underlying Price at Expiration</text>
+    </svg>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" data-tabs="strangles">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab(this,'strangles-mech')">Mechanics &amp; Setup</button>
+      <button class="tab-btn" onclick="switchTab(this,'strangles-edge')">Statistical Edge</button>
+      <button class="tab-btn" onclick="switchTab(this,'strangles-env')">Market Environment</button>
+      <button class="tab-btn" onclick="switchTab(this,'strangles-risk')">Risk &amp; Margins</button>
+    </div>
+    <div class="tab-panel active" id="strangles-mech">
+      <ul>
+        <li><strong>Short Straddle:</strong> simultaneously sell an ATM call and ATM put at the identical strike and expiration — maximum extrinsic premium, narrowest breakeven range.</li>
+        <li><strong>Short Strangle:</strong> sell an OTM call and OTM put — wider breakeven tent, lower absolute credit but higher probability of profit.</li>
+        <li><strong>Optimal Setup:</strong> target the 15–20 delta strikes on both sides at approximately <strong>45 DTE</strong>.</li>
+        <li>Selling at 15–20 delta places strikes precisely at the 1-standard-deviation expected move boundary priced by the market.</li>
+        <li>Both are <strong>undefined risk</strong> positions: max theoretical loss is unlimited on the call side, substantial on the put side.</li>
+        <li>Positions are delta-neutral at entry but will accumulate directional delta as the underlying moves.</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="strangles-edge">
+      <p>At a 16-delta strangle configuration, the purely statistical probability of the underlying remaining within the short strikes at expiration is approximately <strong>68%</strong>. However, because the VRP dictates that the market systematically overprices volatility, the <em>empirical</em> win rate over thousands of occurrences is substantially higher.</p>
+      <ul>
+        <li>As long as realized volatility (RV) &lt; implied volatility (IV) priced into sold options, the position profits through theta decay and vega contraction simultaneously.</li>
+        <li>Theta acceleration is most capital-efficient in the <strong>45 DTE → 21 DTE</strong> window.</li>
+        <li>Historical 45 DTE 16-delta SPY strangles: median P/L ≈ <strong>50% of initial credit</strong> when managed at 21 DTE.</li>
+        <li>Deep OTM call options generate an average return of <strong>−73 bps/day</strong> for buyers, directly benefiting sellers.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">68%</div><div class="lbl">Statistical probability at 16-delta</div></div>
+        <div class="stat-card"><div class="num">4.2pp</div><div class="lbl">Persistent VRP (IV minus RV)</div></div>
+        <div class="stat-card"><div class="num">~50%</div><div class="lbl">Median P/L as % of initial credit</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="strangles-env">
+      <ul>
+        <li>Exclusively optimal in <strong>high IV environments (IVR &gt; 50)</strong> — inflated premiums allow selling strikes far from current price while collecting superior credit.</li>
+        <li>In elevated IV, the breakeven tent widens significantly compared to a low-IV environment for the same credit collected.</li>
+        <li><strong>Short straddles</strong> are specifically favored in range-bound, sideways markets where IV is artificially elevated but directional movement is expected to be minimal.</li>
+        <li><strong>Short strangles</strong> are more forgiving of mild directional drift and are the workhouse strategy for systematic premium sellers.</li>
+        <li>Avoid deploying in low-IV environments — the premium collected is insufficient to justify the undefined-risk capital requirement.</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="strangles-risk">
+      <ul>
+        <li><strong>Profit Target:</strong> close at <strong>50% of max credit</strong> — the capital required to hold for the final 50% of profit is mathematically inefficient.</li>
+        <li><strong>Time Management:</strong> universally close or roll at <strong>21 DTE</strong> to eliminate escalating gamma risk in the final expiration weeks.</li>
+        <li><strong>Defense — Roll Untested Side:</strong> if the short call is breached by a rising market, roll the untested short put up to a higher strike to collect additional credit and reduce net delta.</li>
+        <li>Trigger for rolling: delta differential between call and put legs exceeds <strong>0.15</strong>, or tested side approaches <strong>0.50 delta</strong>.</li>
+        <li><strong>Reg-T Margin (BPR):</strong> approximately 20% of underlying notional value — capital intensive, suppressing ROC.</li>
+        <li><strong>Portfolio Margin:</strong> recognizes dual-sided hedging, reducing BPR by approximately 30% vs. Reg-T.</li>
+        <li>Historical average ROC: approximately <strong>6% per trade</strong> under Reg-T rules on SPY strangles.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">50%</div><div class="lbl">Profit target (% of max credit)</div></div>
+        <div class="stat-card"><div class="num gold">21 DTE</div><div class="lbl">Universal time management trigger</div></div>
+        <div class="stat-card"><div class="num">~6%</div><div class="lbl">Historical avg ROC per trade (Reg-T)</div></div>
+        <div class="stat-card"><div class="num blue">30%</div><div class="lbl">BPR reduction under Portfolio Margin</div></div>
+      </div>
+      <div class="warning-box" style="margin-top:20px">
+        <strong>Undefined Risk Warning:</strong> Short strangles exhibit higher maximum drawdowns and severe tail risks compared to defined-risk strategies. They require flawless, emotionless mechanical execution to maintain positive expectancy over time.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ JADE LIZARD ═══════════════════════ -->
+<section class="strategy-section" id="jade-lizard">
+  <div class="section-label">Strategy 02</div>
+  <h2 class="section-title">Jade Lizards &amp; Twisted Sisters</h2>
+  <p class="section-intro">Asymmetric, slightly directional strategies engineered to harvest volatility skew anomalies while entirely eliminating risk on one specific side of the market. The Jade Lizard exploits the persistent overpricing of OTM puts relative to equidistant OTM calls.</p>
+
+  <div class="badge-strip">
+    <span class="badge badge-green"><span class="badge-label">Win Rate:</span>Very High (80%+)</span>
+    <span class="badge badge-gold"><span class="badge-label">IV Env:</span>High Skew (Puts &gt; Calls)</span>
+    <span class="badge badge-blue"><span class="badge-label">Delta Bias:</span>Slightly Bullish</span>
+    <span class="badge badge-purple"><span class="badge-label">Primary Edge:</span>Volatility Skew Anomaly</span>
+    <span class="badge badge-green"><span class="badge-label">Upside Risk:</span>Zero (by design)</span>
+  </div>
+
+  <!-- SVG Payoff -->
+  <div class="diagram-wrap">
+    <div class="diagram-title">Payoff at Expiration — Jade Lizard</div>
+    <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="600" height="180" fill="transparent"/>
+      <!-- Zero line -->
+      <line x1="30" y1="90" x2="580" y2="90" stroke="#30363d" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- Loss zone fill (left, below put) -->
+      <polygon points="30,165 30,90 140,90 190,65 190,65 30,65" fill="rgba(248,81,73,0.10)"/>
+      <!-- Profit zone fill (middle to right) -->
+      <polygon points="190,65 340,65 390,55 580,55 580,90 390,90 340,90 190,90" fill="rgba(0,217,163,0.10)"/>
+      <!-- Flat top right (zero upside risk) -->
+      <polygon points="390,45 390,65 580,65 580,45" fill="rgba(0,217,163,0.15)"/>
+      <!-- Payoff line -->
+      <polyline points="30,165 140,100 190,65 340,65 390,55 580,55" stroke-width="2.5" fill="none" stroke="#00d9a3"/>
+      <polyline points="30,165 140,100 190,65" stroke-width="2.5" fill="none" stroke="#f85149"/>
+      <!-- Strike lines -->
+      <line x1="190" y1="50" x2="190" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="340" y1="50" x2="340" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="390" y1="50" x2="390" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- Labels -->
+      <text x="190" y="44" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Short Put</text>
+      <text x="340" y="44" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Short Call</text>
+      <text x="390" y="44" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Long Call</text>
+      <text x="490" y="50" fill="#00d9a3" font-size="10" font-family="Inter" text-anchor="middle" font-weight="600">Zero Upside Risk</text>
+      <text x="80" y="130" fill="#f85149" font-size="10" font-family="Inter" text-anchor="middle">Downside Risk</text>
+      <text x="265" y="78" fill="#00d9a3" font-size="9" font-family="Inter" text-anchor="middle">Profit Zone</text>
+      <text x="580" y="88" fill="#8b949e" font-size="9" font-family="Inter">0</text>
+      <text x="300" y="175" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Underlying Price at Expiration</text>
+    </svg>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" data-tabs="jade">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab(this,'jade-mech')">Mechanics &amp; Setup</button>
+      <button class="tab-btn" onclick="switchTab(this,'jade-edge')">Statistical Edge</button>
+      <button class="tab-btn" onclick="switchTab(this,'jade-env')">Market Environment</button>
+      <button class="tab-btn" onclick="switchTab(this,'jade-risk')">Risk &amp; Margins</button>
+    </div>
+    <div class="tab-panel active" id="jade-mech">
+      <ul>
+        <li><strong>Jade Lizard:</strong> sell an OTM put (naked) + sell an OTM call spread (short call + long higher-strike call) — all in the same expiration cycle.</li>
+        <li><strong>Non-Negotiable Rule:</strong> total net credit collected must be <strong>strictly greater than</strong> the maximum width of the short call spread. This guarantees zero upside risk.</li>
+        <li><strong>Twisted Sister:</strong> the exact inverse — sell an OTM naked call + sell an OTM put spread. Only viable when OTM calls trade richer than equidistant OTM puts (inverted skew).</li>
+        <li>Inverted skew is exceedingly rare in broad market equities — typically isolated to violent short-squeeze scenarios, specific commodities, or targeted biotech events.</li>
+        <li>The Jade Lizard carries a <strong>slightly bullish bias</strong> due to the naked short put component.</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="jade-edge">
+      <p>The mathematical edge lies in exploiting the <strong>volatility skew</strong> — in equity markets, OTM puts systematically trade at a premium to equidistant OTM calls. This pricing disparity exists because institutional investors fear rapid violent market crashes far more than equivalent rallies; the historical velocity of downside moves is exponentially higher than the upside grind.</p>
+      <ul>
+        <li>The inflated put premium finances the short call spread such that total credit <em>exceeds</em> the call spread width — resulting in <strong>zero theoretical upside risk</strong>.</li>
+        <li>If the underlying rallies to infinity, the call spread reaches max loss, but the excess put credit perfectly covers it, resulting in a scratch or net profit.</li>
+        <li>The only actual risk assumed is to the downside — mirroring a naked short put but with significantly <em>more</em> initial credit.</li>
+        <li>Historical win rate clusters in the <strong>75%–85%</strong> range depending on delta selections at entry.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">75–85%</div><div class="lbl">Historical win rate range</div></div>
+        <div class="stat-card"><div class="num">0</div><div class="lbl">Upside risk (by construction)</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="jade-env">
+      <ul>
+        <li>Exceptional in <strong>high IV + steep downside skew</strong> environments.</li>
+        <li>Particularly effective around <strong>earnings announcements</strong> where call-side IV may be briefly inflated, allowing the call spread to be sold for premium.</li>
+        <li>Requires a <strong>slightly bullish or neutral</strong> directional assumption (naked put component).</li>
+        <li><strong>Twisted Sister</strong> is mathematically unviable in normal conditions — only deploy when inverted skew is confirmed (unusual commodity markets, biotech binary events, squeeze dynamics).</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="jade-risk">
+      <ul>
+        <li><strong>Upside:</strong> zero risk if construction rules are followed — hold to expiration for guaranteed net credit regardless of how far the underlying rallies.</li>
+        <li><strong>Downside:</strong> naked put risk — undefined loss if underlying collapses toward zero (practically, the loss potential mirrors a standalone naked put).</li>
+        <li><strong>Defense:</strong> if the stock drops, roll the short call spread <em>down</em> in strike to collect additional credit, lowering the cost basis and expanding the downside breakeven threshold.</li>
+        <li><strong>Margin (BPR):</strong> identical to the margin required for the naked short put alone — the call spread side is assessed zero additional margin (it is fully financed and risk-free).</li>
+        <li>Markedly higher capital efficiency and ROC compared to a standalone short put for the same capital outlay.</li>
+      </ul>
+      <div class="highlight-box">
+        <strong>Capital Efficiency Insight:</strong> The Jade Lizard collects substantially more premium than a standalone short put for the exact same margin/BPR requirement, directly elevating the Return on Capital for every dollar deployed.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ IRON CONDORS & BUTTERFLIES ═══════════════════════ -->
+<section class="strategy-section" id="iron-condor">
+  <div class="section-label">Strategy 03</div>
+  <h2 class="section-title">Iron Condors &amp; Iron Butterflies</h2>
+  <p class="section-intro">Defined-risk vehicles for harvesting the Volatility Risk Premium within IRA accounts or capital-restricted environments. The purchased wings cap the maximum loss, sacrificing a calculated portion of premium for catastrophic tail-risk protection.</p>
+
+  <div class="badge-strip">
+    <span class="badge badge-green"><span class="badge-label">Win Rate:</span>Moderate (50–65%)</span>
+    <span class="badge badge-gold"><span class="badge-label">IV Env:</span>High (IVR &gt; 50)</span>
+    <span class="badge badge-blue"><span class="badge-label">Delta Bias:</span>Neutral</span>
+    <span class="badge badge-purple"><span class="badge-label">Primary Edge:</span>Defined VRP Harvest</span>
+    <span class="badge badge-green"><span class="badge-label">Risk:</span>Strictly Defined</span>
+  </div>
+
+  <!-- SVG Payoff -->
+  <div class="diagram-wrap">
+    <div class="diagram-title">Payoff at Expiration — Iron Condor</div>
+    <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="600" height="180" fill="transparent"/>
+      <line x1="30" y1="90" x2="580" y2="90" stroke="#30363d" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- Loss zones fill (capped) -->
+      <polygon points="30,130 30,90 120,90 170,65 170,65 120,65 30,130" fill="rgba(248,81,73,0.10)"/>
+      <polygon points="430,65 480,65 480,90 580,90 580,130 430,130" fill="rgba(248,81,73,0.10)"/>
+      <!-- Profit zone fill -->
+      <polygon points="170,65 430,65 430,90 170,90" fill="rgba(0,217,163,0.12)"/>
+      <!-- Payoff line -->
+      <polyline points="30,130 120,100 170,65 430,65 480,100 580,130" stroke-width="2.5" fill="none" stroke="#00d9a3"/>
+      <polyline points="30,130 120,100 170,65" stroke-width="2.5" fill="none" stroke="#f85149"/>
+      <polyline points="430,65 480,100 580,130" stroke-width="2.5" fill="none" stroke="#f85149"/>
+      <!-- Strike lines -->
+      <line x1="120" y1="50" x2="120" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="170" y1="50" x2="170" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="430" y1="50" x2="430" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="480" y1="50" x2="480" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- Labels -->
+      <text x="120" y="44" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Long Put</text>
+      <text x="170" y="44" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Short Put</text>
+      <text x="430" y="44" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Short Call</text>
+      <text x="480" y="44" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Long Call</text>
+      <text x="300" y="52" fill="#00d9a3" font-size="10" font-family="Inter" text-anchor="middle" font-weight="600">Max Profit Zone</text>
+      <text x="68" y="122" fill="#f85149" font-size="9" font-family="Inter" text-anchor="middle">Defined Max Loss</text>
+      <text x="530" y="122" fill="#f85149" font-size="9" font-family="Inter" text-anchor="middle">Defined Max Loss</text>
+      <text x="580" y="88" fill="#8b949e" font-size="9" font-family="Inter">0</text>
+      <text x="300" y="175" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Underlying Price at Expiration</text>
+    </svg>
+  </div>
+
+  <div class="tabs" data-tabs="ic">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab(this,'ic-mech')">Mechanics &amp; Setup</button>
+      <button class="tab-btn" onclick="switchTab(this,'ic-edge')">Statistical Edge</button>
+      <button class="tab-btn" onclick="switchTab(this,'ic-env')">Market Environment</button>
+      <button class="tab-btn" onclick="switchTab(this,'ic-risk')">Risk &amp; Margins</button>
+    </div>
+    <div class="tab-panel active" id="ic-mech">
+      <ul>
+        <li><strong>Iron Condor (4 legs):</strong> short OTM put spread + short OTM call spread, same expiry. Long wings definitively cap maximum loss.</li>
+        <li><strong>Iron Butterfly:</strong> identical mechanics but short strikes moved to the ATM line — effectively selling an ATM straddle coupled with OTM protective wings.</li>
+        <li><strong>Optimal Wingspan:</strong> approximately <strong>1/10th of the underlying asset's current price</strong> — empirically validated as the sweet spot between credit collected and tail protection cost.</li>
+        <li>Wider wings: position behaves closer to a naked strangle — higher credit, faster theta, superior long-term win rates.</li>
+        <li>Narrow wings: lower credit, cheaper entry, but easily breached and limited theta capture.</li>
+        <li>IRA and restricted account friendly — no naked options exposure.</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="ic-edge">
+      <p>Both strategies retain the core VRP edge but must <em>purchase</em> tail-risk insurance via the long wings, reducing net premium collected. The balance between credit received and the "volatility drag" cost of the wings is the primary determinant of long-term edge.</p>
+      <ul>
+        <li>35-year CNDR Index study (1986–2015): Iron Condor model (sell 20-delta put/call, buy 5-delta wings) produced annualized std dev of only <strong>7.23%</strong> vs. S&amp;P 500's <strong>14.93%</strong>.</li>
+        <li>CNDR: only <strong>10 months</strong> with drawdowns exceeding 6% over 35 years, vs. S&amp;P 500's 15 such months.</li>
+        <li>Iron Butterfly (BFLY): only 2 months of losses exceeding 6% over the same period.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">7.23%</div><div class="lbl">CNDR annualized std dev (1986–2015)</div></div>
+        <div class="stat-card"><div class="num red">14.93%</div><div class="lbl">S&amp;P 500 annualized std dev</div></div>
+        <div class="stat-card"><div class="num">10</div><div class="lbl">Months >6% drawdown (CNDR vs 15 for SPX)</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="ic-env">
+      <ul>
+        <li>Optimal when <strong>IVR &gt; 50</strong> — significant IV crush anticipated from inflated option premiums.</li>
+        <li>Requires a <strong>strictly neutral or range-bound</strong> directional assumption.</li>
+        <li><strong>Iron Condors:</strong> suitable for broad market indices where minor directional drift is tolerated.</li>
+        <li><strong>Iron Butterflies:</strong> require near-stationary underlying to realize peak profitability — highly sensitive to sudden directional expansion beyond the ATM short strikes.</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="ic-risk">
+      <ul>
+        <li><strong>Max Loss:</strong> spread width minus net credit received — quantified exactly at order entry, no surprises.</li>
+        <li><strong>Profit Target — Iron Condor:</strong> close at <strong>50% of max credit</strong>.</li>
+        <li><strong>Profit Target — Iron Butterfly:</strong> close at <strong>25% of max credit</strong> — the extreme difficulty of capturing the pinpoint ATM peak makes 25% the mathematically sound target.</li>
+        <li><strong>Defense:</strong> roll the untested, profitable spread closer to the current price to collect additional credit, directly offsetting the loss on the breached side.</li>
+        <li><strong>BPR:</strong> equal to max loss of the widest spread — only 5–30% of the capital required for a comparable naked strangle position.</li>
+        <li>Substantially lower absolute dollar profit per trade vs. naked strangles, offset by dramatically higher capital efficiency percentage.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">50%</div><div class="lbl">Profit target — Iron Condor</div></div>
+        <div class="stat-card"><div class="num gold">25%</div><div class="lbl">Profit target — Iron Butterfly</div></div>
+        <div class="stat-card"><div class="num blue">5–30%</div><div class="lbl">Capital vs. naked strangle (Reg-T)</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ BROKEN WING BUTTERFLY ═══════════════════════ -->
+<section class="strategy-section" id="bwb">
+  <div class="section-label">Strategy 04</div>
+  <h2 class="section-title">Broken Wing Butterfly (BWB)</h2>
+  <p class="section-intro">An advanced structural evolution of the standard butterfly that transforms a debit-based, low-probability trade into a net-credit, high-probability volatility strategy by deliberately shattering strike-width symmetry to eliminate risk on one entire side of the market.</p>
+
+  <div class="badge-strip">
+    <span class="badge badge-green"><span class="badge-label">Win Rate:</span>High (if credit-routed)</span>
+    <span class="badge badge-gold"><span class="badge-label">IV Env:</span>High (sufficient premium for skip)</span>
+    <span class="badge badge-blue"><span class="badge-label">Delta Bias:</span>Directional</span>
+    <span class="badge badge-purple"><span class="badge-label">Primary Edge:</span>Unbalanced Credit + Theta</span>
+    <span class="badge badge-green"><span class="badge-label">Risk:</span>Defined (one side only)</span>
+  </div>
+
+  <!-- SVG Payoff -->
+  <div class="diagram-wrap">
+    <div class="diagram-title">Payoff at Expiration — Put Broken Wing Butterfly (Bullish)</div>
+    <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="600" height="180" fill="transparent"/>
+      <line x1="30" y1="90" x2="580" y2="90" stroke="#30363d" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- Loss zone fill (left side only - broken wing) -->
+      <polygon points="30,145 30,90 90,90 140,65 140,65 90,65 30,145" fill="rgba(248,81,73,0.10)"/>
+      <!-- Profit peak fill -->
+      <polygon points="140,65 250,65 250,15 280,15 280,65 380,65 380,90 250,90 140,90" fill="rgba(0,217,163,0.10)"/>
+      <!-- Right side (flat credit - zero risk) fill -->
+      <polygon points="380,65 580,65 580,90 380,90" fill="rgba(0,217,163,0.15)"/>
+      <!-- Payoff line: loss on far left, climb, profit peak, down, flat credit on right -->
+      <polyline points="30,145 90,100 140,65 250,15 280,15 380,65 580,65" stroke-width="2.5" fill="none" stroke="#00d9a3"/>
+      <polyline points="30,145 90,100 140,65" stroke-width="2.5" fill="none" stroke="#f85149"/>
+      <!-- Strike lines -->
+      <line x1="140" y1="50" x2="140" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="250" y1="12" x2="250" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="280" y1="12" x2="280" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="380" y1="50" x2="380" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- Labels -->
+      <text x="140" y="44" fill="#f85149" font-size="9" font-family="Inter" text-anchor="middle">Broken Wing</text>
+      <text x="265" y="9" fill="#00d9a3" font-size="9" font-family="Inter" text-anchor="middle">Short Strikes</text>
+      <text x="380" y="44" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Long Put</text>
+      <text x="490" y="58" fill="#00d9a3" font-size="10" font-family="Inter" text-anchor="middle" font-weight="600">Keep Credit (No Risk)</text>
+      <text x="68" y="132" fill="#f85149" font-size="9" font-family="Inter" text-anchor="middle">Max Loss Zone</text>
+      <text x="580" y="88" fill="#8b949e" font-size="9" font-family="Inter">0</text>
+      <text x="300" y="175" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Underlying Price at Expiration</text>
+    </svg>
+  </div>
+
+  <div class="tabs" data-tabs="bwb">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab(this,'bwb-mech')">Mechanics &amp; Setup</button>
+      <button class="tab-btn" onclick="switchTab(this,'bwb-edge')">Statistical Edge</button>
+      <button class="tab-btn" onclick="switchTab(this,'bwb-env')">Market Environment</button>
+      <button class="tab-btn" onclick="switchTab(this,'bwb-risk')">Risk &amp; Margins</button>
+    </div>
+    <div class="tab-panel active" id="bwb-mech">
+      <ul>
+        <li><strong>Standard Butterfly:</strong> buy 1 ITM/ATM option, sell 2 ATM/OTM options, buy 1 further OTM option — all equidistant widths. Results in net <em>debit</em>. Requires near-exact pin of short strikes at expiration for profit.</li>
+        <li><strong>Broken Wing Butterfly:</strong> move the furthest OTM long option even <em>further</em> OTM, creating an unbalanced structure. The credit spread side becomes <strong>wider</strong> than the debit spread side.</li>
+        <li>This asymmetry allows the entire 4-leg structure to be established for a <strong>net credit</strong> rather than a net debit.</li>
+        <li><strong>Put BWB:</strong> deployed below the market with the broken wing on the downside — implies a mildly bullish to neutral bias.</li>
+        <li><strong>Call BWB:</strong> deployed above the market with the broken wing on the upside — implies a mildly bearish to neutral bias.</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="bwb-edge">
+      <p>By routing the trade for a net credit, the trader <strong>completely eliminates risk on one entire side</strong>. If the underlying moves violently away from the broken wing direction, the structure expires worthless and the initial credit is retained as pure profit — no management required.</p>
+      <ul>
+        <li>Exhaustive DE (Differential Evolution) optimization studies on 10+ years of SPY options data confirm statistical dominance of the credit-routed BWB structure.</li>
+        <li>BWB provides higher theta decay profile and lower directional delta footprint vs. standard unbalanced butterfly.</li>
+        <li><strong>Three possible outcomes:</strong> (1) high-probability small win — market moves away from broken wing, keep credit; (2) low-probability large win — underlying pins exactly at short strikes, maximum value realized; (3) defined maximum loss — underlying violently breaches broken wing strike.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">3</div><div class="lbl">Distinct potential outcome scenarios</div></div>
+        <div class="stat-card"><div class="num">0</div><div class="lbl">Risk on non-broken side</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="bwb-env">
+      <ul>
+        <li>Deploy in <strong>high IV environments</strong> where option premium is sufficiently rich to facilitate the wide skip-strike mechanics needed to generate a net credit at entry.</li>
+        <li>If IV is too low, the skip-strike adjustment cannot generate enough credit to overcome the cost of the debit spread — the BWB degrades to a net debit structure and loses its statistical advantage.</li>
+        <li><strong>Put BWB:</strong> mildly bullish to neutral market assumption.</li>
+        <li><strong>Call BWB:</strong> mildly bearish to neutral market assumption.</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="bwb-risk">
+      <ul>
+        <li><strong>Max Loss:</strong> triggered if the underlying completely blows past the broken wing strike prior to expiration — defined and quantified at entry.</li>
+        <li>Max loss = width of the broken (wider) credit spread minus the net credit received.</li>
+        <li><strong>Profit Target:</strong> close the entire structure at <strong>50% of maximum theoretical profit</strong> — typically when the closest long option goes slightly ITM as expiration approaches.</li>
+        <li><strong>Defense:</strong> close the profitable long debit spread component and roll the remaining short credit spread further out in time to collect additional premium and defend the strike.</li>
+        <li><strong>Margin (BPR):</strong> equal to the width of the broken credit spread minus net credit received — highly capital efficient relative to naked options.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">50%</div><div class="lbl">Profit target (% of max theoretical)</div></div>
+        <div class="stat-card"><div class="num blue">Low</div><div class="lbl">Margin (defined broken spread width)</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ CALENDAR & DIAGONAL SPREADS ═══════════════════════ -->
+<section class="strategy-section" id="calendars">
+  <div class="section-label">Strategy 05</div>
+  <h2 class="section-title">Calendar &amp; Diagonal Spreads</h2>
+  <p class="section-intro">These strategies pivot the focus away from vertical volatility skew and instead exploit the <em>term structure</em> of volatility — capitalizing on differential theta decay rates between sequential expiration cycles and IV mean reversion dynamics. Critically, these are deployed in <strong>low</strong> IV environments, opposite to most premium-selling strategies.</p>
+
+  <div class="badge-strip">
+    <span class="badge badge-green"><span class="badge-label">Win Rate:</span>Moderate</span>
+    <span class="badge badge-blue"><span class="badge-label">IV Env:</span>Low (IVR &lt; 25)</span>
+    <span class="badge badge-gold"><span class="badge-label">Delta Bias:</span>Neutral (Cal) / Directional (Diag)</span>
+    <span class="badge badge-purple"><span class="badge-label">Primary Edge:</span>Vega Expansion + Term Structure</span>
+    <span class="badge badge-green"><span class="badge-label">Risk:</span>Strictly Defined (net debit)</span>
+  </div>
+
+  <!-- SVG Payoff -->
+  <div class="diagram-wrap">
+    <div class="diagram-title">Payoff Profile — Calendar Spread (at Near-Term Expiration)</div>
+    <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="600" height="180" fill="transparent"/>
+      <line x1="30" y1="120" x2="580" y2="120" stroke="#30363d" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- Loss zones -->
+      <polygon points="30,120 30,145 200,145 200,120" fill="rgba(248,81,73,0.08)"/>
+      <polygon points="400,120 400,145 580,145 580,120" fill="rgba(248,81,73,0.08)"/>
+      <!-- Profit zone -->
+      <polygon points="200,120 300,20 400,120" fill="rgba(0,217,163,0.12)"/>
+      <!-- Bell curve payoff -->
+      <path d="M 30,142 Q 100,140 200,120 Q 250,65 300,20 Q 350,65 400,120 Q 500,140 580,142" stroke-width="2.5" fill="none" stroke="#00d9a3"/>
+      <path d="M 30,142 Q 100,140 200,120" stroke-width="2.5" fill="none" stroke="#f85149"/>
+      <path d="M 400,120 Q 500,140 580,142" stroke-width="2.5" fill="none" stroke="#f85149"/>
+      <!-- Lines -->
+      <line x1="300" y1="16" x2="300" y2="165" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- Labels -->
+      <text x="300" y="12" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">At-the-Money Strike</text>
+      <text x="300" y="52" fill="#00d9a3" font-size="10" font-family="Inter" text-anchor="middle" font-weight="600">Max Profit Zone</text>
+      <text x="110" y="138" fill="#f85149" font-size="9" font-family="Inter" text-anchor="middle">Max Loss = Net Debit</text>
+      <text x="490" y="138" fill="#f85149" font-size="9" font-family="Inter" text-anchor="middle">Max Loss = Net Debit</text>
+      <text x="580" y="118" fill="#8b949e" font-size="9" font-family="Inter">0</text>
+      <text x="300" y="175" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Underlying Price at Near-Term Expiration</text>
+    </svg>
+  </div>
+
+  <div class="tabs" data-tabs="cal">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab(this,'cal-mech')">Mechanics &amp; Setup</button>
+      <button class="tab-btn" onclick="switchTab(this,'cal-edge')">Statistical Edge</button>
+      <button class="tab-btn" onclick="switchTab(this,'cal-env')">Market Environment</button>
+      <button class="tab-btn" onclick="switchTab(this,'cal-risk')">Risk &amp; Margins</button>
+    </div>
+    <div class="tab-panel active" id="cal-mech">
+      <ul>
+        <li><strong>Calendar Spread:</strong> sell a near-term option (30–45 DTE) + buy a longer-term option (60–90 DTE) at the <strong>exact same strike price</strong>. Always established for a net debit.</li>
+        <li><strong>Diagonal Spread:</strong> same temporal mechanics but with <em>different strike prices</em> — a hybrid between a calendar and a vertical spread.</li>
+        <li>Most common diagonal: buy a deep ITM LEAPS contract (long duration), repeatedly sell near-term OTM options against it — the <strong>Poor Man&apos;s Covered Call (PMCC)</strong>.</li>
+        <li><strong>Setup Rule:</strong> net debit paid must never exceed <strong>75% of the total strike width</strong> to ensure positive theoretical max profit.</li>
+        <li><strong>Critical Warning:</strong> never trade calendars or diagonals in volatility products (e.g., VIX options) — each expiry is an independent underlying asset, rendering theoretical max loss undefined.</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="cal-edge">
+      <p>The primary edge is the direct exploitation of the theta decay curve: the <strong>near-term short option decays faster</strong> than the long-term option backing it, generating a credit differential that compounds over each cycle.</p>
+      <ul>
+        <li>Calendar spreads are pure <em>extrinsic value</em> trades — intrinsic value cancels out at the shared strike.</li>
+        <li>Structurally <strong>long vega</strong>: the position profits from any expansion in overall market implied volatility (IV expansion = long option gains more value than short option).</li>
+        <li>Diagonals introduce heavy <strong>delta exposure</strong> — directional bias finances the long-duration LEAPS through consecutive near-term option sales.</li>
+        <li>Target return: <strong>10%–25%</strong> on the initial net debit paid. Attempting to hold for larger gains significantly reduces win rate.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">10–25%</div><div class="lbl">Target ROI on initial net debit</div></div>
+        <div class="stat-card"><div class="num blue">Long Vega</div><div class="lbl">Benefits from IV expansion</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="cal-env">
+      <ul>
+        <li><strong>Calendar Spreads MUST be deployed in low IV (IVR &lt; 25)</strong> — this is the opposite of most premium-selling strategies and a critical distinction.</li>
+        <li>Low IV entry allows the trader to benefit from the statistical <em>mean reversion</em> back toward historical IV norms — the long vega position profits as IV expands.</li>
+        <li>Entering a calendar during IV contraction severely damages the position: the long option loses premium rapidly, eroding the position value before theta collection can compensate.</li>
+        <li><strong>Diagonal Spreads:</strong> deploy when holding a strong directional conviction but wishing to reduce localized cost basis and limit capital risk vs. owning 100 shares outright.</li>
+      </ul>
+      <div class="warning-box">
+        <strong>Critical Contrast:</strong> While strangles and iron condors need IVR &gt; 50, calendar spreads need IVR &lt; 25. Deploying a calendar in high IV guarantees exposure to IV crush on the long leg.
+      </div>
+    </div>
+    <div class="tab-panel" id="cal-risk">
+      <ul>
+        <li><strong>Max Loss:</strong> strictly capped at the initial net debit paid — no hidden risks.</li>
+        <li>Max profit cannot be precisely calculated at entry due to fluctuating forward volatility curves and unpredictable term structure shifts across expiry cycles.</li>
+        <li><strong>Defense for Diagonals:</strong> if the underlying moves against the directional assumption, roll the short option closer to the current price to collect more premium, reducing the overall breakeven.</li>
+        <li><strong>BPR:</strong> equal to the net debit paid — exceptionally capital efficient. One of the most accessible structures for small or IRA accounts.</li>
+        <li>No naked options in either structure — fully defined risk from entry.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num green">Debit Only</div><div class="lbl">Max loss = net debit paid</div></div>
+        <div class="stat-card"><div class="num blue">IRA</div><div class="lbl">Accessible in restricted accounts</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ NAKED PUTS & COVERED STRANGLES ═══════════════════════ -->
+<section class="strategy-section" id="naked-puts">
+  <div class="section-label">Strategy 06</div>
+  <h2 class="section-title">Naked Put Selling &amp; Covered Strangles</h2>
+  <p class="section-intro">The primary methodology for blending core equity ownership mechanics with the persistent yield-generating alpha of the Volatility Risk Premium. The short put is arguably the most capital-efficient single-instrument vehicle for VRP harvesting — empirically validated by 32 years of the Cboe PUT Index data.</p>
+
+  <div class="badge-strip">
+    <span class="badge badge-green"><span class="badge-label">Win Rate:</span>~68–80%</span>
+    <span class="badge badge-gold"><span class="badge-label">IV Env:</span>High (IVR &gt; 50)</span>
+    <span class="badge badge-blue"><span class="badge-label">Delta Bias:</span>Bullish</span>
+    <span class="badge badge-purple"><span class="badge-label">Primary Edge:</span>Volatility Risk Premium</span>
+  </div>
+
+  <!-- SVG Payoff -->
+  <div class="diagram-wrap">
+    <div class="diagram-title">Payoff at Expiration — Short Naked Put</div>
+    <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="600" height="180" fill="transparent"/>
+      <line x1="30" y1="90" x2="580" y2="90" stroke="#30363d" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- Loss zone -->
+      <polygon points="30,155 30,90 180,90 280,60 280,60 180,60 30,155" fill="rgba(248,81,73,0.10)"/>
+      <!-- Profit zone -->
+      <polygon points="280,60 580,60 580,90 280,90" fill="rgba(0,217,163,0.12)"/>
+      <!-- Payoff line -->
+      <polyline points="30,155 180,100 280,60 580,60" stroke-width="2.5" fill="none" stroke="#00d9a3"/>
+      <polyline points="30,155 180,100 280,60" stroke-width="2.5" fill="none" stroke="#f85149"/>
+      <!-- Strike line -->
+      <line x1="280" y1="50" x2="280" y2="170" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- Breakeven line -->
+      <line x1="180" y1="55" x2="180" y2="170" stroke="#f0b429" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- Labels -->
+      <text x="280" y="44" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Short Put Strike</text>
+      <text x="180" y="49" fill="#f0b429" font-size="9" font-family="Inter" text-anchor="middle">Breakeven</text>
+      <text x="430" y="53" fill="#00d9a3" font-size="10" font-family="Inter" text-anchor="middle" font-weight="600">Keep Full Credit</text>
+      <text x="90" y="140" fill="#f85149" font-size="9" font-family="Inter" text-anchor="middle">Loss Below Strike</text>
+      <text x="580" y="88" fill="#8b949e" font-size="9" font-family="Inter">0</text>
+      <text x="300" y="175" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Underlying Price at Expiration</text>
+    </svg>
+  </div>
+
+  <div class="tabs" data-tabs="puts">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab(this,'puts-mech')">Mechanics &amp; Setup</button>
+      <button class="tab-btn" onclick="switchTab(this,'puts-edge')">Statistical Edge</button>
+      <button class="tab-btn" onclick="switchTab(this,'puts-env')">Market Environment</button>
+      <button class="tab-btn" onclick="switchTab(this,'puts-risk')">Risk &amp; Margins</button>
+    </div>
+    <div class="tab-panel active" id="puts-mech">
+      <ul>
+        <li><strong>Naked Short Put:</strong> write a put option contract without shorting underlying stock — generates immediate upfront cash credit.</li>
+        <li><strong>Cash-Secured Put:</strong> retain 100% of capital required to take assignment (strike price × 100 shares) as collateral against the short put.</li>
+        <li><strong>Naked Put (Reg-T):</strong> only ~20% of underlying notional required, providing theoretical 5x leverage.</li>
+        <li><strong>Covered Strangle:</strong> own 100 shares of the underlying + simultaneously sell an OTM covered call + sell an OTM naked put in the same expiry. Aggressive double-sided premium collection.</li>
+        <li><strong>Critical Risk (Covered Strangle):</strong> the short put is NOT covered by the long stock. Below the put strike, losses compound: $2 lost for every $1 the underlying falls below the put strike.</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="puts-edge">
+      <p>The short put is structurally identical to a covered call — both have strictly limited upside (strike + premium) and identical downside risk. However, the short put is <strong>mathematically superior</strong> on every transaction efficiency metric.</p>
+      <ul>
+        <li>Single transaction vs. two (stock purchase + call sale). Tighter bid-ask spreads. No dividend taxation or assignment inefficiencies.</li>
+        <li><strong>Cboe PUT Index (32-year study):</strong> 9.54% CAGR vs. SPX 9.80%, but with dramatically lower volatility.</li>
+        <li>PUT Index annualized std dev: <strong>9.95%</strong> vs. S&amp;P 500&apos;s <strong>14.93%</strong>.</li>
+        <li>Sharpe Ratio: PUT Index <strong>0.65</strong> vs. S&amp;P 500&apos;s <strong>0.49</strong> — superior risk-adjusted returns for 32 years.</li>
+        <li>During the 2008 financial crisis, the PUT Index exhibited vastly superior downside protection vs. the equity market — not through hedging, but through continuous collection of massively inflated VRP.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">0.65</div><div class="lbl">PUT Index Sharpe Ratio (32yr)</div></div>
+        <div class="stat-card"><div class="num red">0.49</div><div class="lbl">S&amp;P 500 Sharpe Ratio</div></div>
+        <div class="stat-card"><div class="num">9.95%</div><div class="lbl">PUT Index annualized std dev</div></div>
+        <div class="stat-card"><div class="num gold">14.93%</div><div class="lbl">S&amp;P 500 annualized std dev</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="puts-env">
+      <ul>
+        <li><strong>Naked Puts:</strong> excel in neutral-to-bullish market regimes with elevated implied volatility (IVR &gt; 50).</li>
+        <li>Unlike the delta-neutral strangle, a standalone short put leaves the trader <em>fully exposed</em> to downside equity correlation — it is a directionally committed (bullish) position.</li>
+        <li><strong>Covered Strangle:</strong> strictly an aggressive asset accumulation strategy for strongly bullish, capital-rich investors seeking to lower cost basis on dividend-paying blue-chip equities or broad index ETFs.</li>
+        <li>Covered strangle requires fully welcoming potential dual assignment (being called away on shares AND assigned additional shares via the put).</li>
+      </ul>
+    </div>
+    <div class="tab-panel" id="puts-risk">
+      <ul>
+        <li><strong>Max Loss:</strong> underlying falls to zero — substantial but mathematically defined. Practically managed via rolling.</li>
+        <li><strong>Defense:</strong> if the short strike is breached, roll the put further OTM and further out in time for a net credit — delays assignment indefinitely while capturing additional extrinsic value.</li>
+        <li><strong>Covered Strangle — Call Breach:</strong> shares called away at max profit — welcomed outcome.</li>
+        <li><strong>Covered Strangle — Put Breach:</strong> accept assignment, doubling equity exposure at a substantially lower effective cost basis.</li>
+        <li><strong>Capital Requirements:</strong> Cash-secured = 100% notional. Naked (Reg-T) = ~20% notional. Covered strangle = 100% stock capital + ~20% put margin.</li>
+        <li><strong>Covered Strangle ROC:</strong> approximately <strong>0.68%</strong> — the massive capital drag from holding 100 shares destroys capital efficiency despite the dual premium collection.</li>
+      </ul>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="num">~20%</div><div class="lbl">Reg-T margin for naked put</div></div>
+        <div class="stat-card"><div class="num">100%</div><div class="lbl">Capital req. for cash-secured put</div></div>
+        <div class="stat-card"><div class="num red">0.68%</div><div class="lbl">Covered strangle ROC (capital drag)</div></div>
+        <div class="stat-card"><div class="num gold">~7.5%</div><div class="lbl">Naked strangle ROC (comparable)</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ MARGIN FRAMEWORKS ═══════════════════════ -->
+<section class="strategy-section" id="margins">
+  <div class="section-label">Reference</div>
+  <h2 class="section-title">Margin Frameworks &amp; Capital Efficiency</h2>
+  <p class="section-intro">The true mathematical efficacy of quantitative options trading is measured not by absolute P/L, but by the efficiency with which portfolio capital is deployed. Understanding the structural duality between Regulation-T and Portfolio Margin is critical to assessing long-term strategy viability.</p>
+
+  <div class="margin-grid">
+    <!-- Reg-T Card -->
+    <div class="margin-card">
+      <h3>Regulation-T Margin</h3>
+      <div class="subtitle-sm">Standard retail brokerage framework</div>
+      <ul>
+        <li>Static, fixed-percentage, <strong>position-based</strong> margining system.</li>
+        <li>Evaluates every position in total <strong>isolation</strong> — no portfolio-level offsets recognized.</li>
+        <li>Naked strangle BPR: approximately <strong>20% of underlying notional value</strong>.</li>
+        <li>Naked strangle BPR is <strong>4–5x higher</strong> than the BPR for an identical-width iron condor.</li>
+        <li>Artificially suppresses Return on Capital of undefined-risk strategies despite their empirical data superiority.</li>
+        <li>Baseline historical SPY strangle ROC under Reg-T: approximately <strong>6% per trade</strong>.</li>
+        <li>Used as the 6% ROC threshold as a mechanical minimum entry requirement benchmark.</li>
+      </ul>
+    </div>
+    <!-- PM Card -->
+    <div class="margin-card pm">
+      <h3>Portfolio Margin (PM)</h3>
+      <div class="subtitle-sm">Risk-based framework — OCC TIMS model</div>
+      <ul>
+        <li>Dynamic, purely <strong>risk-based</strong> system utilizing the Theoretical Intermarket Margining System (TIMS) mandated by the OCC.</li>
+        <li>Continuously stress-tests the <strong>entire portfolio</strong> across 10 equidistant hypothetical price shocks (−20% to +20%) combined with severe IV expansions.</li>
+        <li>Natively recognizes mathematical offsets within complex, hedged, delta-neutral portfolios.</li>
+        <li>Reduces capital requirement by approximately <strong>30%</strong> for identical positions vs. Reg-T.</li>
+        <li>Transforms steady, low-yield VRP harvesting into substantial, compounding absolute portfolio growth.</li>
+        <li>Generally requires minimum net liquidation value of <strong>$125,000</strong> at most brokerages.</li>
+      </ul>
+      <div class="highlight-box" style="margin-top:16px">
+        <strong>30% reduction</strong> in BPR under Portfolio Margin provides the quantitative leverage necessary to increase position occurrences, diversify across more underlyings, and exponentially enhance compounding growth.
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-cards" style="margin-top:24px">
+    <div class="stat-card"><div class="num">20%</div><div class="lbl">Reg-T BPR for naked strangle (% of notional)</div></div>
+    <div class="stat-card"><div class="num green">30%</div><div class="lbl">BPR reduction under Portfolio Margin</div></div>
+    <div class="stat-card"><div class="num gold">4–5x</div><div class="lbl">Reg-T naked strangle vs. iron condor BPR</div></div>
+    <div class="stat-card"><div class="num blue">$125K</div><div class="lbl">Typical minimum equity for PM eligibility</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ STRATEGY MATRIX ═══════════════════════ -->
+<section class="strategy-section" id="matrix">
+  <div class="section-label">Reference</div>
+  <h2 class="section-title">Strategy Comparison Matrix</h2>
+  <p class="section-intro">Aggregated structural realities, historical performance metrics, optimal deployment environments, and margin dynamics for all analyzed strategies — a definitive quantitative ranking framework.</p>
+
+  <div class="matrix-wrap">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Strategy</th>
+          <th>Win Rate (POP)</th>
+          <th>Capital Efficiency</th>
+          <th>IV Environment</th>
+          <th>Delta Bias</th>
+          <th>Primary Edge</th>
+          <th>Management Trigger</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Short Strangle</td>
+          <td class="cell-green">High (~68–80%)</td>
+          <td class="cell-yellow">Low (Reg-T) / High (PM)</td>
+          <td class="cell-green">High IVR &gt; 50</td>
+          <td>Neutral</td>
+          <td>VRP + Theta</td>
+          <td>50% Profit / 21 DTE</td>
+        </tr>
+        <tr>
+          <td>Short Straddle</td>
+          <td class="cell-yellow">Moderate (~50–60%)</td>
+          <td class="cell-yellow">Low (Reg-T) / High (PM)</td>
+          <td class="cell-green">High IVR &gt; 50 + Range-Bound</td>
+          <td>Neutral</td>
+          <td>VRP + Maximum Theta</td>
+          <td>50% Profit / 21 DTE</td>
+        </tr>
+        <tr>
+          <td>Jade Lizard</td>
+          <td class="cell-green">Very High (80%+)</td>
+          <td class="cell-green">Moderate (= Short Put BPR)</td>
+          <td class="cell-green">High Skew (Puts &gt; Calls)</td>
+          <td>Slightly Bullish</td>
+          <td>Volatility Skew Anomaly</td>
+          <td>50% Profit</td>
+        </tr>
+        <tr>
+          <td>Iron Condor</td>
+          <td class="cell-yellow">Moderate (50–65%)</td>
+          <td class="cell-green">Very High (Defined Risk)</td>
+          <td class="cell-green">High IVR &gt; 50</td>
+          <td>Neutral</td>
+          <td>VRP (Capped by Wing Cost)</td>
+          <td>50% Profit / 21 DTE</td>
+        </tr>
+        <tr>
+          <td>Iron Butterfly</td>
+          <td class="cell-yellow">Moderate (40–55%)</td>
+          <td class="cell-green">Very High (Defined Risk)</td>
+          <td class="cell-green">High IVR &gt; 50</td>
+          <td>Neutral</td>
+          <td>VRP (Pinpoint ATM)</td>
+          <td>25% Profit</td>
+        </tr>
+        <tr>
+          <td>Broken Wing Butterfly</td>
+          <td class="cell-green">High (if credit-routed)</td>
+          <td class="cell-green">High (Defined Risk)</td>
+          <td class="cell-green">High (sufficient premium)</td>
+          <td>Directional</td>
+          <td>Unbalanced Credit + Theta</td>
+          <td>50% Profit</td>
+        </tr>
+        <tr>
+          <td>Calendar Spread</td>
+          <td class="cell-yellow">Moderate</td>
+          <td class="cell-green">Very High (Low Net Debit)</td>
+          <td class="cell-blue">Low IVR &lt; 25</td>
+          <td>Neutral</td>
+          <td>Vega Expansion + Term Structure</td>
+          <td>10–25% on Debit</td>
+        </tr>
+        <tr>
+          <td>Diagonal Spread (PMCC)</td>
+          <td class="cell-yellow">Moderate</td>
+          <td class="cell-green">High (vs. 100 Shares)</td>
+          <td class="cell-blue">Low to Moderate</td>
+          <td>Directional</td>
+          <td>Vega Expansion + Extrinsic Decay</td>
+          <td>25–50% Profit</td>
+        </tr>
+        <tr>
+          <td>Naked Put (Cash-Secured)</td>
+          <td class="cell-green">High (~68–80%)</td>
+          <td class="cell-red">Low (100% Notional)</td>
+          <td class="cell-green">High IVR &gt; 50</td>
+          <td>Bullish</td>
+          <td>Volatility Risk Premium</td>
+          <td>50% Profit / Roll at Breach</td>
+        </tr>
+        <tr>
+          <td>Naked Put (Reg-T Margined)</td>
+          <td class="cell-green">High (~68–80%)</td>
+          <td class="cell-yellow">Moderate (~20% Notional)</td>
+          <td class="cell-green">High IVR &gt; 50</td>
+          <td>Bullish</td>
+          <td>Volatility Risk Premium</td>
+          <td>50% Profit / Roll at Breach</td>
+        </tr>
+        <tr>
+          <td>Covered Strangle</td>
+          <td class="cell-green">High</td>
+          <td class="cell-red">Extremely Low (Shares + Put Margin)</td>
+          <td class="cell-green">High IVR &gt; 50</td>
+          <td>Highly Bullish</td>
+          <td>Aggressive Income Generation</td>
+          <td>Call Assignment / Put Roll</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="content-grid" style="margin-top:32px">
+    <div class="content-card">
+      <h4>Highest Probability Strategies</h4>
+      <ul>
+        <li>Jade Lizard — zero upside risk + heavy put skew harvest</li>
+        <li>Short Strangle — persistent VRP + dual theta collection</li>
+        <li>Naked Put — decades of PUT Index outperformance</li>
+        <li>Broken Wing Butterfly — one-sided risk elimination via credit routing</li>
+      </ul>
+    </div>
+    <div class="content-card">
+      <h4>Most Capital Efficient Strategies</h4>
+      <ul>
+        <li>Calendar Spread — BPR equals only the net debit paid</li>
+        <li>Iron Condor — defined risk requires 5–30% of naked position capital</li>
+        <li>Diagonal Spread — LEAPS leverage vs. owning 100 shares outright</li>
+        <li>Iron Butterfly — defined risk with potential large reward on pinpoint</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer style="background:var(--surface);border-top:1px solid var(--border);padding:40px 48px;color:var(--text-muted);font-size:13px;line-height:1.7">
+  <div style="max-width:800px">
+    <div style="font-weight:700;color:var(--text);margin-bottom:8px">Options Strategies: Statistical Edge Analysis</div>
+    <p>This educational resource is based on quantitative academic research and historical backtesting data. All statistics cited are sourced from peer-reviewed studies, Cboe Global Markets publications, and publicly available index methodology documents. This material is for educational purposes only and does not constitute financial advice.</p>
+    <div style="margin-top:16px;color:var(--text-muted);font-size:12px">
+      Key sources: Cboe CNDR &amp; BFLY Index Studies (1986–2015) &bull; Cboe PutWrite Index (PUT) 32-Year Historical Analysis &bull; Princeton Dataspace VRP Research &bull; OCC TIMS Portfolio Margin Methodology &bull; Differential Evolution BWB Optimization (SCIRP Journal)
+    </div>
+  </div>
+</footer>
+
+</div><!-- end #main -->
+
+<script>
+// ── Tab switching ──
+function switchTab(btn, panelId) {
+  const tabsEl = btn.closest('.tabs');
+  tabsEl.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  tabsEl.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+// ── Sidebar toggle (mobile) ──
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+
+// Close sidebar when nav link clicked on mobile
+document.querySelectorAll('#sidebar nav a').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 900) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+    }
+  });
+});
+
+// ── Scroll-spy via IntersectionObserver ──
+const sections = document.querySelectorAll('section[id], header[id]');
+const navLinks = document.querySelectorAll('#sidebar nav a[data-section]');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.dataset.section === id);
+      });
+    }
+  });
+}, {
+  rootMargin: '-20% 0px -70% 0px',
+  threshold: 0
+});
+
+sections.forEach(s => observer.observe(s));
+
+// ── Smooth scroll offset for sticky sidebar ──
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      window.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+    }
+  });
+});
+</script>
+</body>
+</html>
