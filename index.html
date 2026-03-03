@@ -527,6 +527,30 @@ nav .nav-section {
 .margin-card ul li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
 .margin-card.pm { border-color: rgba(0,217,163,0.3); }
 
+/* ── Concept images ── */
+.concept-image-wrap {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 32px;
+  background: var(--surface);
+}
+.concept-image-wrap img {
+  width: 100%;
+  display: block;
+  opacity: 0.92;
+}
+.concept-image-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   #hamburger { display: flex; }
@@ -560,6 +584,7 @@ nav .nav-section {
   </div>
   <nav>
     <div class="nav-section">Overview</div>
+    <a href="#primer" data-section="primer">Options Primer</a>
     <a href="#site-header" data-section="site-header">Introduction</a>
     <a href="#foundations" data-section="foundations">Foundations</a>
     <div class="nav-section">Strategies</div>
@@ -569,6 +594,11 @@ nav .nav-section {
     <a href="#bwb" data-section="bwb">Broken Wing Butterfly</a>
     <a href="#calendars" data-section="calendars">Calendar / Diagonal</a>
     <a href="#naked-puts" data-section="naked-puts">Naked Puts</a>
+    <div class="nav-section">Synthetics</div>
+    <a href="#synthetics-foundation" data-section="synthetics-foundation">Foundations</a>
+    <a href="#synthetics-stock" data-section="synthetics-stock">Synthetic Positions</a>
+    <a href="#synthetics-arb" data-section="synthetics-arb">Arbitrage Synthetics</a>
+    <a href="#synthetics-risks" data-section="synthetics-risks">Risks</a>
     <div class="nav-section">Reference</div>
     <a href="#margins" data-section="margins">Margin Frameworks</a>
     <a href="#matrix" data-section="matrix">Strategy Matrix</a>
@@ -585,11 +615,442 @@ nav .nav-section {
   <p class="subtitle">A rigorous breakdown of systematic options trading strategies designed to harvest the Volatility Risk Premium, theta decay, and implied volatility mean reversion — backed by decades of empirical research.</p>
   <div class="header-stats">
     <div class="header-stat"><div class="num">4.2pp</div><div class="lbl">Persistent VRP (1990–2018)</div></div>
-    <div class="header-stat"><div class="num">8</div><div class="lbl">Strategies Covered</div></div>
+    <div class="header-stat"><div class="num">12</div><div class="lbl">Strategies &amp; Synthetics</div></div>
     <div class="header-stat"><div class="num">35yr</div><div class="lbl">CNDR Index Study</div></div>
     <div class="header-stat"><div class="num">0.65</div><div class="lbl">PUT Index Sharpe Ratio</div></div>
   </div>
 </header>
+
+</header>
+
+<!-- ══════════════════════════════ OPTIONS PRIMER ══════════════════════════════ -->
+<section class="strategy-section" id="primer">
+  <div class="section-label">Prerequisites</div>
+  <h2 class="section-title">Options Trading: A Foundational Primer</h2>
+  <p class="section-intro">Before advancing into systematic volatility harvesting strategies, a rigorous understanding of derivative contract mechanics, pricing theory, and the Greeks is essential. This primer covers the mandatory foundational mechanics — from contract anatomy and moneyness through the four basic architectures, pricing surfaces, and execution microstructure.</p>
+
+  <div class="tabs" data-tabs="primer">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab(this,'primer-intro')">Intro &amp; Concepts</button>
+      <button class="tab-btn" onclick="switchTab(this,'primer-arch')">Four Architectures</button>
+      <button class="tab-btn" onclick="switchTab(this,'primer-pricing')">Pricing &amp; Volatility</button>
+      <button class="tab-btn" onclick="switchTab(this,'primer-greeks')">The Greeks</button>
+      <button class="tab-btn" onclick="switchTab(this,'primer-execution')">Order Flow &amp; Exercise</button>
+      <button class="tab-btn" onclick="switchTab(this,'primer-assignment')">Assignment &amp; Expiry</button>
+    </div>
+
+    <!-- ── Tab 1: Intro & Concepts ── -->
+    <div class="tab-panel active" id="primer-intro">
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.75;margin-bottom:20px">
+        Options are <strong style="color:var(--text)">non-linear, time-bounded derivative contracts</strong> that operate on entirely different structural and mathematical foundations from equity ownership. They do not confer voting rights or dividend entitlements — instead, they offer highly complex payoff distributions that allow practitioners to isolate pure directional movement, implied volatility expansion, or the passage of time itself.
+      </p>
+
+      <h4 style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Equity vs. Derivative Contracts</h4>
+      <div class="matrix-wrap" style="margin-bottom:28px">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Equity Ownership</th>
+              <th>Derivative Contract (Options)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Fundamental Nature</td>
+              <td class="cell-blue">Fractional ownership stake in a corporate entity</td>
+              <td class="cell-green">Financial contract deriving value from an underlying asset</td>
+            </tr>
+            <tr>
+              <td>Duration</td>
+              <td class="cell-blue">Perpetual — no expiration date</td>
+              <td class="cell-yellow">Finite lifespan — expires on a predetermined date</td>
+            </tr>
+            <tr>
+              <td>Rights Conferred</td>
+              <td class="cell-blue">Voting rights, dividend entitlements, asset claims</td>
+              <td class="cell-green">Conditional right or obligation to buy/sell the underlying</td>
+            </tr>
+            <tr>
+              <td>Capital Efficiency</td>
+              <td class="cell-red">Low — requires full cash value or 50% Reg-T margin</td>
+              <td class="cell-green">High — requires only option premium or margin for naked sales</td>
+            </tr>
+            <tr>
+              <td>Payoff Structure</td>
+              <td class="cell-blue">Linear — 1:1 correlation with share price</td>
+              <td class="cell-green">Non-linear — exhibits convexity from fixed strikes and time decay</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="content-grid" style="margin-bottom:28px">
+        <div class="content-card">
+          <h4>Anatomy of the Standardized Option Contract</h4>
+          <ul>
+            <li><strong>Underlying Asset:</strong> The specific security (stock, ETF, index) upon which the option is written. Its real-time price is the primary dynamic input for valuation models.</li>
+            <li><strong>Strike Price:</strong> The exact, fixed price at which the option buyer may execute their right to buy or sell the underlying. Remains permanently fixed through the contract's life (adjusted only for corporate actions by the OCC).</li>
+            <li><strong>Expiration Date:</strong> The precise moment the contract ceases to exist. If conditions for exercise are not met, the option expires entirely worthless — a 100% loss of premium for the buyer.</li>
+            <li><strong>Premium &amp; Contract Multiplier:</strong> The market price of the contract. For standardized U.S. equity and ETF options, the multiplier is invariably <strong>100</strong> — one contract represents 100 shares. A $4.00 quoted premium requires a $400 capital outlay per contract.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Moneyness: ITM, ATM, OTM</h4>
+          <ul>
+            <li><strong>In-the-Money (ITM):</strong> Exercising immediately yields positive gross cash flow — call: spot &gt; strike; put: strike &gt; spot. Contains both <em>intrinsic value</em> and extrinsic value. High absolute delta. Trades closest to underlying on a dollar-for-dollar basis.</li>
+            <li><strong>At-the-Money (ATM):</strong> Spot ≈ strike. The mathematical inflection point of the chain. Zero intrinsic value but the <em>highest concentration of extrinsic time value</em> on the entire chain. Most sensitive to IV changes and theta decay.</li>
+            <li><strong>Out-of-the-Money (OTM):</strong> Exercising immediately yields a loss — call: spot &lt; strike; put: spot &gt; strike. Contains <em>zero intrinsic value</em> — premium is 100% extrinsic. Cheapest contracts, highest leverage, highest statistical probability of expiring worthless.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Moneyness Spectrum SVG -->
+      <div class="diagram-wrap">
+        <div class="diagram-title">Moneyness Spectrum — Value Composition Across the Option Chain</div>
+        <svg viewBox="0 0 600 130" xmlns="http://www.w3.org/2000/svg">
+          <rect width="600" height="130" fill="transparent"/>
+          <!-- Background zones -->
+          <rect x="30" y="20" width="175" height="70" rx="6" fill="rgba(0,217,163,0.08)" stroke="rgba(0,217,163,0.2)" stroke-width="1"/>
+          <rect x="213" y="20" width="174" height="70" rx="6" fill="rgba(240,180,41,0.08)" stroke="rgba(240,180,41,0.2)" stroke-width="1"/>
+          <rect x="395" y="20" width="175" height="70" rx="6" fill="rgba(88,166,255,0.05)" stroke="rgba(88,166,255,0.15)" stroke-width="1"/>
+          <!-- Zone labels -->
+          <text x="117" y="38" fill="#00d9a3" font-size="11" font-family="Inter" font-weight="700" text-anchor="middle">IN-THE-MONEY</text>
+          <text x="300" y="38" fill="#f0b429" font-size="11" font-family="Inter" font-weight="700" text-anchor="middle">AT-THE-MONEY</text>
+          <text x="483" y="38" fill="#58a6ff" font-size="11" font-family="Inter" font-weight="700" text-anchor="middle">OUT-OF-THE-MONEY</text>
+          <!-- Value descriptions -->
+          <text x="117" y="56" fill="#8b949e" font-size="10" font-family="Inter" text-anchor="middle">Intrinsic + Extrinsic</text>
+          <text x="300" y="56" fill="#8b949e" font-size="10" font-family="Inter" text-anchor="middle">Max Extrinsic Value</text>
+          <text x="483" y="56" fill="#8b949e" font-size="10" font-family="Inter" text-anchor="middle">100% Extrinsic Only</text>
+          <!-- Delta range -->
+          <text x="117" y="74" fill="#00d9a3" font-size="10" font-family="Inter" text-anchor="middle">|Δ| → 0.70–1.00</text>
+          <text x="300" y="74" fill="#f0b429" font-size="10" font-family="Inter" text-anchor="middle">|Δ| ≈ 0.50</text>
+          <text x="483" y="74" fill="#58a6ff" font-size="10" font-family="Inter" text-anchor="middle">|Δ| → 0.00–0.35</text>
+          <!-- Arrow spectrum line -->
+          <line x1="45" y1="100" x2="555" y2="100" stroke="var(--border)" stroke-width="1.5"/>
+          <polygon points="555,97 563,100 555,103" fill="var(--text-muted)"/>
+          <text x="45" y="117" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Deep ITM</text>
+          <text x="300" y="117" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">ATM (Strike = Spot)</text>
+          <text x="555" y="117" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Deep OTM</text>
+          <!-- Strike marker -->
+          <line x1="300" y1="95" x2="300" y2="105" stroke="var(--gold)" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- ── Tab 2: Four Architectures ── -->
+    <div class="tab-panel" id="primer-arch">
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.75;margin-bottom:20px">
+        The entire derivatives market, regardless of strategy complexity, is constructed from <strong style="color:var(--text)">four elementary building blocks</strong>. Every multi-leg spread — strangles, iron condors, butterflies — is a combination of these four base positions.
+      </p>
+      <div class="content-grid">
+        <div class="content-card">
+          <h4 style="color:var(--accent)">Long Call — Bullish</h4>
+          <ul>
+            <li><strong>Right to buy</strong> the underlying at the strike price prior to expiration.</li>
+            <li><strong>Max Loss:</strong> Premium paid (100% of capital deployed) — strictly defined, never more.</li>
+            <li><strong>Max Profit:</strong> Unlimited — no mathematical cap on upside appreciation.</li>
+            <li><strong>Breakeven:</strong> Strike + Premium paid.</li>
+            <li>Profits if the underlying rises significantly above the strike before expiration. A wasting asset — time works against the buyer every day.</li>
+          </ul>
+          <div class="highlight-box" style="margin-top:12px">
+            <strong>Capital Leverage:</strong> Controls 100 shares for the cost of the premium alone. A $4 premium = $400 outlay to control $10,000 of stock at a $100 strike.
+          </div>
+        </div>
+        <div class="content-card">
+          <h4 style="color:var(--red)">Short Call — Bearish / Neutral</h4>
+          <ul>
+            <li><strong>Obligation to sell</strong> the underlying at the strike price if assigned by the buyer.</li>
+            <li><strong>Max Profit:</strong> Premium received upfront — the absolute ceiling of reward.</li>
+            <li><strong>Max Loss:</strong> Unlimited — the underlying can theoretically rise to infinity.</li>
+            <li><strong>Breakeven:</strong> Strike + Premium received.</li>
+            <li>Profits if the underlying remains below the strike through expiration. Theta works in the seller's favor daily.</li>
+          </ul>
+          <div class="warning-box" style="margin-top:12px">
+            <strong>Naked Call Risk:</strong> Selling a call without owning the underlying creates unlimited, uncapped loss exposure. Requires the highest tier of margin approval at all brokerages.
+          </div>
+        </div>
+        <div class="content-card">
+          <h4 style="color:var(--blue)">Long Put — Bearish</h4>
+          <ul>
+            <li><strong>Right to sell</strong> the underlying at the strike price prior to expiration.</li>
+            <li><strong>Max Loss:</strong> Premium paid — strictly defined, never more.</li>
+            <li><strong>Max Profit:</strong> Substantial but capped — achieved if the underlying falls to zero: (Strike × 100) − Premium paid.</li>
+            <li><strong>Breakeven:</strong> Strike − Premium paid.</li>
+            <li>A capital-efficient alternative to short-selling the underlying stock outright. No margin loan, no borrow costs.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4 style="color:var(--gold)">Short Put — Bullish / Neutral</h4>
+          <ul>
+            <li><strong>Obligation to buy</strong> the underlying at the strike price if assigned by the buyer.</li>
+            <li><strong>Max Profit:</strong> Premium received upfront — the absolute ceiling of reward.</li>
+            <li><strong>Max Loss:</strong> Substantial — equal to (Strike × 100) − Premium received, if the underlying goes to zero.</li>
+            <li><strong>Breakeven:</strong> Strike − Premium received.</li>
+            <li>The foundational building block of the Volatility Risk Premium harvesting strategies that follow. Theta accrues to the seller daily.</li>
+          </ul>
+          <div class="highlight-box" style="margin-top:12px">
+            <strong>The PUT Index:</strong> 32 years of data show systematic naked put writing matched the S&amp;P 500 return with a superior Sharpe ratio of 0.65 vs. 0.49.
+          </div>
+        </div>
+      </div>
+      <div class="stat-cards" style="margin-top:24px">
+        <div class="stat-card"><div class="num">2</div><div class="lbl">Positions with unlimited risk (Short Call, Short Put theoretical)</div></div>
+        <div class="stat-card"><div class="num">2</div><div class="lbl">Positions with defined max loss (Long Call, Long Put)</div></div>
+        <div class="stat-card"><div class="num blue">4</div><div class="lbl">Elementary building blocks for all multi-leg strategies</div></div>
+        <div class="stat-card"><div class="num gold">100</div><div class="lbl">Shares per contract (universal U.S. multiplier)</div></div>
+      </div>
+    </div>
+
+    <!-- ── Tab 3: Pricing & Volatility ── -->
+    <div class="tab-panel" id="primer-pricing">
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.75;margin-bottom:20px">
+        Every option premium consists of two mathematically distinct components. Understanding their individual dynamics — and how implied volatility warps them — is the core pricing insight that separates systematic traders from directional speculators.
+      </p>
+
+      <h4 style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Premium Components</h4>
+      <div class="stat-cards" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="num">Intrinsic</div>
+          <div class="lbl">The immediate exercise value. Call: max(S−K, 0). Put: max(K−S, 0). Only ITM options have intrinsic value — it cannot be negative.</div>
+        </div>
+        <div class="stat-card">
+          <div class="num gold">Extrinsic</div>
+          <div class="lbl">Time + volatility premium. Total Premium − Intrinsic Value. Decays to exactly zero at expiration regardless of moneyness. ATM options are 100% extrinsic.</div>
+        </div>
+        <div class="stat-card">
+          <div class="num blue">ATM</div>
+          <div class="lbl">At-the-money options carry zero intrinsic value but maximum extrinsic — making them the most sensitive contracts to both IV changes and theta decay.</div>
+        </div>
+      </div>
+
+      <h4 style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Historical Volatility vs. Implied Volatility</h4>
+      <div class="content-grid" style="margin-bottom:20px">
+        <div class="content-card">
+          <h4>Historical Volatility (HV)</h4>
+          <ul>
+            <li>A strictly <strong>backward-looking</strong> statistical metric.</li>
+            <li>Calculated as the annualized standard deviation of daily logarithmic returns over a defined past period.</li>
+            <li>Reflects the asset's actual, recorded price dispersion — the factual baseline for normal market behavior.</li>
+            <li>Used as a critical input for setting stop-loss levels, position sizing, and risk parameters.</li>
+            <li>Also known as <strong>Realized Volatility (RV)</strong>.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Implied Volatility (IV)</h4>
+          <ul>
+            <li>An entirely <strong>forward-looking</strong> construct — derived by reverse-engineering the option pricing model from current market premiums.</li>
+            <li>Represents the market's aggregate expectation of future price movement over the remaining life of the option.</li>
+            <li>Functions as a real-time proxy for market sentiment and fear — rises sharply before earnings, macro events, and geopolitical shocks.</li>
+            <li>The VIX measures the 30-day IV of a wide strip of S&amp;P 500 options — the equity market's "fear gauge."</li>
+          </ul>
+        </div>
+      </div>
+      <div class="highlight-box" style="margin-bottom:24px">
+        <strong>The Volatility Risk Premium:</strong> Statistically, Implied Volatility consistently overstates subsequent Realized Volatility — by an average of 4.2 percentage points from 1990–2018 on the S&amp;P 500. Options act as financial insurance; market participants systematically overpay for downside protection. This persistent discrepancy is the structural alpha source exploited by every premium-selling strategy in this course.
+      </div>
+
+      <h4 style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Volatility Surface Anomalies</h4>
+      <div class="content-grid">
+        <div class="content-card">
+          <h4>Volatility Smile</h4>
+          <ul>
+            <li>A <strong>U-shaped curve</strong> that emerges when plotting IV against strike prices for a specific expiration.</li>
+            <li>Both deep OTM and deep ITM options command significantly higher IV than ATM options.</li>
+            <li>Highly prevalent in currency options and short-term equity options.</li>
+            <li>Proves the market assigns far higher probability to extreme outlier moves than a normal distribution predicts — a direct acknowledgment of <strong>fat tails</strong> in asset returns.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Volatility Skew</h4>
+          <ul>
+            <li>A <strong>pronounced asymmetric tilt</strong> to the IV curve — almost universally negative (left-tailed) in modern equity markets, especially post-1987.</li>
+            <li>OTM puts trade at significantly higher IV than equidistant OTM calls because of inelastic institutional demand for downside portfolio protection.</li>
+            <li>When markets drop rapidly, hedging demand intensifies, further steepening the skew.</li>
+            <li><strong>Commodities skew positively</strong> — supply shocks can cause theoretically unbound price spikes, so OTM calls command elevated IV.</li>
+            <li>This structural put premium is the specific anomaly exploited by Jade Lizard strategies.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab 4: The Greeks ── -->
+    <div class="tab-panel" id="primer-greeks">
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.75;margin-bottom:20px">
+        The Greeks are the partial derivatives of the option pricing model — they isolate exactly how an option's theoretical price reacts to a unit change in a specific external variable. Mastering them is the prerequisite for constructing, hedging, and managing complex portfolio exposures in a non-linear payoff environment.
+      </p>
+      <div class="content-grid">
+        <div class="content-card">
+          <h4>Delta (Δ) — Directional Exposure</h4>
+          <ul>
+            <li>Measures the expected change in option premium for a $1 move in the underlying. Call deltas range 0 to +1.0; put deltas range −1.0 to 0.</li>
+            <li>ATM options exhibit |Δ| ≈ 0.50. Deep ITM options approach |Δ| = 1.0 and move dollar-for-dollar with the underlying.</li>
+            <li>For market makers, Delta is the <strong>hedge ratio</strong> — the exact number of shares required to maintain delta neutrality.</li>
+          </ul>
+          <div class="warning-box" style="margin-top:10px">
+            <strong>Delta ≠ Probability of expiring ITM.</strong> Delta = N(d1) in the Black-Scholes formula, which is the risk-adjusted hedge ratio. The actual risk-neutral probability of expiring ITM is N(d2), which is always slightly less than N(d1). The difference equals e<sup>σ√T</sup>. Real-world (physical measure) probabilities differ further, as they incorporate the equity risk premium.
+          </div>
+        </div>
+        <div class="content-card">
+          <h4>Gamma (Γ) — Convexity &amp; Acceleration</h4>
+          <ul>
+            <li>Measures the rate of change in Delta for every $1 move in the underlying. If Delta is "speed," Gamma is "acceleration."</li>
+            <li>Peaks for ATM options near expiration — as time compresses, an ATM option's delta can violently snap between 0 and 1.0 on fractional tick movements ("Gamma explosion").</li>
+            <li><strong>Gamma Scalping:</strong> A long ATM straddle is long Gamma. As the underlying oscillates, delta changes continuously. The market maker must buy the underlying when it falls and sell when it rises to restore delta neutrality — a mechanical "buy low, sell high" process that generates profits designed to offset the straddle's theta decay. This is foundational to quantitative volatility arbitrage.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Theta (Θ) — Time Decay</h4>
+          <ul>
+            <li>Quantifies the expected daily reduction in an option's extrinsic value, all else equal. A negative force for buyers, a positive force for sellers.</li>
+            <li>The decay curve is <strong>exponential, not linear</strong>. For ATM options, decay accelerates dramatically in the final weeks and days before expiration.</li>
+            <li>For deep ITM and deep OTM options, the theta curve flattens near expiration — the probability cone has already collapsed past their strikes, leaving almost no extrinsic value to decay.</li>
+          </ul>
+          <div class="stat-cards" style="grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+            <div class="stat-card"><div class="num red">60–80%</div><div class="lbl">Extrinsic lost in final week for high-liquidity ATM contracts</div></div>
+            <div class="stat-card"><div class="num gold">0DTE</div><div class="lbl">Options can lose massive extrinsic value within hours intraday</div></div>
+          </div>
+        </div>
+        <div class="content-card">
+          <h4>Vega (ν) — Volatility Sensitivity</h4>
+          <ul>
+            <li>Measures the change in an option's price for a 1% change in implied volatility. Unlike Delta/Gamma/Theta, Vega responds to the market's fluctuating expectation of future turbulence — not underlying price movement or time.</li>
+            <li>Highest for <strong>longer-dated ATM options</strong> — more time means more opportunity for future volatility to influence the probability distribution.</li>
+            <li>Long options are long Vega (benefit from IV expansion). Short options are short Vega (damaged by IV spikes).</li>
+            <li>Managing Vega risk is central to preventing catastrophic portfolio losses when macroeconomic fear triggers systemic IV spikes.</li>
+            <li><strong>Advanced Greeks:</strong> Vanna (∂Δ/∂σ) and Charm (∂Δ/∂t) are used by institutional desks to model complex dealer hedging flows and gamma exposure levels (GEX/DEX) across the market.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab 5: Order Flow & Exercise ── -->
+    <div class="tab-panel" id="primer-execution">
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.75;margin-bottom:20px">
+        Every options transaction requires a specific order designation informing the clearinghouse whether a position is being initiated or liquidated. Separately, the exercise style of the option (American vs. European) governs when those rights may be invoked — with substantial consequences for option sellers.
+      </p>
+
+      <h4 style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Order Flow Designations</h4>
+      <div class="matrix-wrap" style="margin-bottom:28px">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Designation</th>
+              <th>Meaning</th>
+              <th>Function</th>
+              <th>Subsequent Closing Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cell-green">BTO</td>
+              <td>Buy to Open</td>
+              <td>Initiates a long position. The trader pays a premium to acquire rights.</td>
+              <td>STC (Sell to Close)</td>
+            </tr>
+            <tr>
+              <td class="cell-red">STO</td>
+              <td>Sell to Open</td>
+              <td>Initiates a short position (writing). The trader collects a premium and assumes obligations.</td>
+              <td>BTC (Buy to Close)</td>
+            </tr>
+            <tr>
+              <td class="cell-blue">STC</td>
+              <td>Sell to Close</td>
+              <td>Liquidates an existing long position. The trader relinquishes their rights to realize a gain or loss.</td>
+              <td>N/A — closes the position</td>
+            </tr>
+            <tr>
+              <td class="cell-yellow">BTC</td>
+              <td>Buy to Close</td>
+              <td>Liquidates an existing short position. The trader buys back the contract to extinguish their obligations.</td>
+              <td>N/A — closes the position</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="highlight-box" style="margin-bottom:24px">
+        <strong>Tape Reading Ambiguity:</strong> A block of 10,000 contracts bought (BTO) looks identical on the ticker tape to 10,000 contracts bought to close (BTC) a large short position. The designations are invisible to external flow analysts — yet one represents aggressive new speculation and the other represents a large seller locking in profits.
+      </div>
+
+      <h4 style="font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">American vs. European Exercise Style</h4>
+      <div class="content-grid">
+        <div class="content-card">
+          <h4>European-Style Options</h4>
+          <ul>
+            <li>Can only be exercised at the <strong>precise moment of expiration</strong> — no early exercise rights.</li>
+            <li>Generally easier to price mathematically; avoids the complexity of an early exercise premium.</li>
+            <li>The vast majority of <strong>broad-market index options</strong> are European-style: SPX (S&amp;P 500), XSP (Mini-SPX), NDX (Nasdaq-100).</li>
+            <li><strong>Cash-settled:</strong> No physical delivery of shares — the contract settles in cash based on the difference between the index level and the strike at expiration.</li>
+            <li>No early assignment risk for option sellers — a significant structural advantage.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>American-Style Options</h4>
+          <ul>
+            <li>Afford the buyer the right to exercise at <strong>any point prior to expiration</strong>, up to and including the expiration date.</li>
+            <li>All standard U.S. individual equity and ETF options (AAPL, SPY, QQQ, etc.) are American-style.</li>
+            <li><strong>Physically settled:</strong> Actual underlying shares must be exchanged upon exercise.</li>
+            <li>For option sellers, American-style mechanics introduce <strong>Early Assignment Risk</strong> — the risk of being randomly assigned an exercise notice unexpectedly prior to expiration, triggering potential margin calls or forced stock borrow.</li>
+          </ul>
+          <div class="warning-box" style="margin-top:10px">
+            <strong>Early Assignment Risk:</strong> American-style options can be assigned at any time. Sellers of short calls on dividend-paying equities face acute assignment risk the day prior to the ex-dividend date.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tab 6: Assignment & Expiry Risk ── -->
+    <div class="tab-panel" id="primer-assignment">
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.75;margin-bottom:20px">
+        While it is theoretically inefficient to exercise an option early — because doing so destroys any remaining extrinsic time value — two precise mathematical exceptions exist where early exercise becomes optimal for the holder, creating systematic assignment risk for short sellers.
+      </p>
+      <div class="content-grid" style="margin-bottom:24px">
+        <div class="content-card">
+          <h4>Dividend Early Exercise Boundary — Short Calls</h4>
+          <ul>
+            <li><strong>Condition:</strong> The pending dividend payout is mathematically greater than the remaining extrinsic (time) value of the corresponding ITM call option.</li>
+            <li>On the ex-dividend date, the stock price artificially drops by the exact dividend amount. The call holder who exercises early captures the underlying shares in time to collect the dividend, forfeiting negligible time value in exchange for superior cash income.</li>
+            <li><strong>Consequence for short sellers:</strong> Traders holding short ITM calls on dividend-paying equities face extreme assignment risk the <em>day prior</em> to the ex-dividend date.</li>
+            <li><strong>Mitigation:</strong> Roll the short call out in time or up in strike to increase extrinsic value before the ex-date. Alternatively, buy back the short call entirely to prevent being forced to pay the dividend out of pocket to the counterparty.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Deep ITM Put — Cost-of-Carry Boundary</h4>
+          <ul>
+            <li><strong>Condition:</strong> The risk-free interest rate that could be earned on the cash proceeds of exercising the put (receiving the strike price immediately) exceeds the negligible remaining time value in the deep ITM put.</li>
+            <li>When a put is deep ITM, its delta approaches −1.0 and its extrinsic value decays to nearly zero. Exercising delivers cash equal to the strike price instantly.</li>
+            <li>If the risk-free interest yield on that cash over the remaining contract life exceeds the put's remaining time premium, early exercise is mathematically optimal.</li>
+            <li>This establishes a calculable <strong>Early Exercise Premium (EEP)</strong> that makes American puts structurally more valuable than comparable European puts when interest rates are elevated.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="content-card">
+          <h4>Max Pain Theory</h4>
+          <ul>
+            <li>Hypothesizes that the underlying stock price will gravitationally drift toward the specific strike price that causes the highest total dollar value of outstanding options (calls and puts combined) to expire worthless.</li>
+            <li>This strike minimizes the total financial payout required from option writers — predominantly institutional market makers and dealers.</li>
+            <li>Not manipulation — a natural, structural byproduct of mechanical <strong>delta hedging by dealers</strong> maintaining delta-neutral portfolios across massive short option inventories.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Price Pinning at Expiration</h4>
+          <ul>
+            <li>As expiration approaches and Gamma explodes, dealer hedging flows create <strong>massive opposing pressures</strong> around heavily trafficked open interest strikes.</li>
+            <li>If the stock drops slightly below the major strike, dealers must buy the stock to hedge their changing deltas. If it rises slightly above, they sell. This reflexive, continuous hedging activity traps the underlying.</li>
+            <li>The result: the underlying "pins" to the max pain strike as the closing bell rings on expiration Friday — a predictable microstructure phenomenon exploitable by systematic options sellers who close positions before the final hours.</li>
+          </ul>
+          <div class="highlight-box" style="margin-top:10px">
+            <strong>Practical Application:</strong> Closing or rolling positions before the final 2–3 days of expiration (the 21 DTE management rule) systematically avoids the extreme Gamma risk and pin uncertainty that defines the last expiration cycle.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .tabs -->
+</section>
 
 <!-- ══════════════════════════════ FOUNDATIONS ══════════════════════════════ -->
 <section class="strategy-section" id="foundations">
@@ -603,6 +1064,10 @@ nav .nav-section {
       <div class="icon">📊</div>
       <h3>Volatility Risk Premium (VRP)</h3>
       <p>Option implied volatility <strong>systematically overstates</strong> subsequent realized volatility. Options function as financial insurance — buyers consistently pay above fair value to hedge tail risk, creating a persistent structural premium for sellers.</p>
+      <div class="concept-image-wrap" style="margin-top:14px;margin-bottom:16px">
+        <img src="images/vrp-concept.png" alt="Conceptual illustration of the Volatility Risk Premium as a structural premium-collection vault" loading="lazy">
+        <div class="concept-image-label">Concept Illustration — Volatility Risk Premium</div>
+      </div>
       <div class="vrp-visual">
         <div class="vrp-bar-wrap">
           <div class="vrp-bar-label">Implied Volatility (VIX avg)</div>
@@ -627,6 +1092,10 @@ nav .nav-section {
       <div class="icon">⏳</div>
       <h3>Theta Decay Acceleration</h3>
       <p>Option premiums consist of intrinsic and extrinsic value. Extrinsic value erodes to zero at expiration along a <strong>non-linear, accelerating curve</strong> — not linearly. The zone between 45 and 21 DTE captures the steepest decay per dollar at risk.</p>
+      <div class="concept-image-wrap" style="margin-top:14px;margin-bottom:16px">
+        <img src="images/theta-decay-concept.png" alt="Conceptual illustration of theta decay accelerating toward expiration like sand falling through an hourglass" loading="lazy">
+        <div class="concept-image-label">Concept Illustration — Theta Decay Acceleration</div>
+      </div>
       <svg viewBox="0 0 280 100" style="width:100%;margin:12px 0">
         <defs>
           <linearGradient id="theta-grad" x1="0" x2="1" y1="0" y2="0">
@@ -654,6 +1123,10 @@ nav .nav-section {
       <div class="icon">🔄</div>
       <h3>IV Mean Reversion</h3>
       <p>Implied volatility is a <strong>bounded metric</strong> — unlike equity prices, volatility cannot rise to infinity or fall below zero. Periods of extreme IV expansion are predictably followed by contraction ("IV crush"), generating alpha even if the underlying is stationary.</p>
+      <div class="concept-image-wrap" style="margin-top:14px;margin-bottom:16px">
+        <img src="images/iv-mean-reversion.png" alt="Conceptual illustration of implied volatility oscillating between hard boundaries and reverting to its mean" loading="lazy">
+        <div class="concept-image-label">Concept Illustration — IV Mean Reversion</div>
+      </div>
       <p>The <strong>IV Rank (IVR)</strong> measures current IV as a percentile of its 52-week range, providing a normalized signal for when conditions favor short-premium strategies.</p>
       <div class="stat-cards" style="grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
         <div class="stat-card"><div class="num" style="color:var(--red)">IVR&gt;50</div><div class="lbl">Short premium environment</div></div>
@@ -668,6 +1141,11 @@ nav .nav-section {
   <div class="section-label">Strategy 01</div>
   <h2 class="section-title">Short Strangles &amp; Short Straddles</h2>
   <p class="section-intro">The purest structural forms of short-volatility, non-directional trading. Designed to harvest the Volatility Risk Premium and theta decay while maintaining a delta-neutral posture at entry.</p>
+
+  <div class="concept-image-wrap">
+    <img src="images/short-strangle-concept.png" alt="Conceptual illustration of a short strangle: a teal profit corridor flanked by red undefined-risk zones beyond both short strikes" loading="lazy">
+    <div class="concept-image-label">Concept Illustration — Short Strangle Profit Zone</div>
+  </div>
 
   <div class="badge-strip">
     <span class="badge badge-green"><span class="badge-label">Win Rate:</span>~68–80%</span>
@@ -788,6 +1266,11 @@ nav .nav-section {
   <h2 class="section-title">Jade Lizards &amp; Twisted Sisters</h2>
   <p class="section-intro">Asymmetric, slightly directional strategies engineered to harvest volatility skew anomalies while entirely eliminating risk on one specific side of the market. The Jade Lizard exploits the persistent overpricing of OTM puts relative to equidistant OTM calls.</p>
 
+  <div class="concept-image-wrap">
+    <img src="images/jade-lizard-concept.png" alt="Conceptual illustration of the Jade Lizard strategy: a jade lizard with zero upside risk on one side and defined downside risk on the other" loading="lazy">
+    <div class="concept-image-label">Concept Illustration — Jade Lizard Asymmetric Risk</div>
+  </div>
+
   <div class="badge-strip">
     <span class="badge badge-green"><span class="badge-label">Win Rate:</span>Very High (80%+)</span>
     <span class="badge badge-gold"><span class="badge-label">IV Env:</span>High Skew (Puts &gt; Calls)</span>
@@ -886,6 +1369,11 @@ nav .nav-section {
   <div class="section-label">Strategy 03</div>
   <h2 class="section-title">Iron Condors &amp; Iron Butterflies</h2>
   <p class="section-intro">Defined-risk vehicles for harvesting the Volatility Risk Premium within IRA accounts or capital-restricted environments. The purchased wings cap the maximum loss, sacrificing a calculated portion of premium for catastrophic tail-risk protection.</p>
+
+  <div class="concept-image-wrap">
+    <img src="images/iron-condor-concept.png" alt="Conceptual illustration of the Iron Condor strategy: a condor soaring between defined ceiling and floor risk boundaries" loading="lazy">
+    <div class="concept-image-label">Concept Illustration — Iron Condor Defined Risk Boundaries</div>
+  </div>
 
   <div class="badge-strip">
     <span class="badge badge-green"><span class="badge-label">Win Rate:</span>Moderate (50–65%)</span>
@@ -990,6 +1478,11 @@ nav .nav-section {
   <h2 class="section-title">Broken Wing Butterfly (BWB)</h2>
   <p class="section-intro">An advanced structural evolution of the standard butterfly that transforms a debit-based, low-probability trade into a net-credit, high-probability volatility strategy by deliberately shattering strike-width symmetry to eliminate risk on one entire side of the market.</p>
 
+  <div class="concept-image-wrap">
+    <img src="images/bwb-concept.png" alt="Conceptual illustration of the Broken Wing Butterfly: an asymmetric butterfly with one extended broken wing representing the skip-strike credit structure" loading="lazy">
+    <div class="concept-image-label">Concept Illustration — Broken Wing Butterfly Asymmetry</div>
+  </div>
+
   <div class="badge-strip">
     <span class="badge badge-green"><span class="badge-label">Win Rate:</span>High (if credit-routed)</span>
     <span class="badge badge-gold"><span class="badge-label">IV Env:</span>High (sufficient premium for skip)</span>
@@ -1086,6 +1579,11 @@ nav .nav-section {
   <div class="section-label">Strategy 05</div>
   <h2 class="section-title">Calendar &amp; Diagonal Spreads</h2>
   <p class="section-intro">These strategies pivot the focus away from vertical volatility skew and instead exploit the <em>term structure</em> of volatility — capitalizing on differential theta decay rates between sequential expiration cycles and IV mean reversion dynamics. Critically, these are deployed in <strong>low</strong> IV environments, opposite to most premium-selling strategies.</p>
+
+  <div class="concept-image-wrap">
+    <img src="images/calendar-spread-concept.png" alt="Conceptual illustration of a calendar spread: near-term premium dissolving rapidly while the far-term option retains value across time" loading="lazy">
+    <div class="concept-image-label">Concept Illustration — Calendar Spread Term Structure Edge</div>
+  </div>
 
   <div class="badge-strip">
     <span class="badge badge-green"><span class="badge-label">Win Rate:</span>Moderate</span>
@@ -1274,6 +1772,378 @@ nav .nav-section {
         <div class="stat-card"><div class="num gold">~7.5%</div><div class="lbl">Naked strangle ROC (comparable)</div></div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SYNTHETICS FOUNDATION ═══════════════════════ -->
+<section class="strategy-section" id="synthetics-foundation">
+  <div class="section-label">The Architecture of Synthetics</div>
+  <h2 class="section-title">Put-Call Parity &amp; Theoretical Basis</h2>
+  <p class="section-intro">Synthetic options strategies leverage the no-arbitrage relationships between underlying assets and their corresponding options to emulate the exact risk, reward, and cash flow profiles of natural positions using alternative derivative combinations. The entire edifice rests on a single theorem enforced continuously by quantitative market makers.</p>
+
+  <div class="concept-image-wrap">
+    <img src="images/put-call-parity.png" alt="Conceptual illustration of put-call parity: a perfectly balanced scale with call and put options in mathematical equilibrium" loading="lazy">
+    <div class="concept-image-label">Concept Illustration — Put-Call Parity No-Arbitrage Equilibrium</div>
+  </div>
+
+  <div class="foundations-grid">
+    <!-- Put-Call Parity Card -->
+    <div class="foundation-card">
+      <div class="icon">⚖️</div>
+      <h3>Put-Call Parity</h3>
+      <p>For European options, put-call parity defines the mandatory pricing equilibrium that must exist between a call option, a put option, the underlying asset, and a risk-free bond. A portfolio consisting of a <strong>long call and a short put</strong> at the same strike and expiration has the exact same return profile as a <strong>forward contract</strong> on the underlying.</p>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:14px 0;font-family:monospace;font-size:13px;color:var(--text);line-height:2">
+        <div style="color:var(--accent);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Core No-Arbitrage Equation</div>
+        <div><span style="color:var(--accent)">C</span> + <span style="color:var(--gold)">Ke<sup>-rT</sup></span> = <span style="color:var(--blue)">P</span> + <span style="color:var(--text)">S</span></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:10px;font-family:Inter,sans-serif;line-height:1.6">
+          <strong style="color:var(--accent)">C</strong> = Call price &nbsp;|&nbsp; <strong style="color:var(--blue)">P</strong> = Put price &nbsp;|&nbsp; <strong style="color:var(--text)">S</strong> = Spot price<br>
+          <strong style="color:var(--gold)">K</strong> = Strike price &nbsp;|&nbsp; <strong style="color:var(--text-muted)">r</strong> = Risk-free rate &nbsp;|&nbsp; <strong style="color:var(--text-muted)">T</strong> = Time to expiry
+        </div>
+      </div>
+      <p>If this parity is ever violated, market participants can execute <strong>riskless arbitrage</strong> to extract guaranteed profits until the market returns to equilibrium. This enforcement is continuous and is the reason synthetic positions mirror natural positions precisely.</p>
+      <div class="highlight-box">
+        <strong>Dividend Adjustment:</strong> When discrete dividends (D) are expected, the formula expands to account for their present value, making the Reversal/Conversion value explicit: the cost of carry to expiry encompasses both interest rates and dividend distributions.
+      </div>
+    </div>
+
+    <!-- Equation of Three Card -->
+    <div class="foundation-card">
+      <div class="icon">🔢</div>
+      <h3>The Equation of Three</h3>
+      <p>In institutional trading, put-call parity is operationalized through the <strong>"Equation of Three."</strong> Any financial position involving an underlying stock, a call, and a put can be perfectly replicated if a trader holds any two of the three instruments — the third is always implied.</p>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:14px 0">
+        <div style="color:var(--accent);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Algebraic Rearrangements</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+          <li style="font-size:13px;color:var(--text-muted);display:flex;gap:8px;align-items:baseline">
+            <span style="color:var(--accent);flex-shrink:0">▸</span>
+            <span><strong style="color:var(--text)">Synthesize a Call:</strong> Long Stock + Long Put</span>
+          </li>
+          <li style="font-size:13px;color:var(--text-muted);display:flex;gap:8px;align-items:baseline">
+            <span style="color:var(--accent);flex-shrink:0">▸</span>
+            <span><strong style="color:var(--text)">Synthesize a Put:</strong> Long Stock + Short Call</span>
+          </li>
+          <li style="font-size:13px;color:var(--text-muted);display:flex;gap:8px;align-items:baseline">
+            <span style="color:var(--accent);flex-shrink:0">▸</span>
+            <span><strong style="color:var(--text)">Synthesize the Spot:</strong> Long Call + Short Put</span>
+          </li>
+        </ul>
+      </div>
+      <p>Market makers utilize <strong>mental compression</strong> to rapidly identify arbitrage opportunities — perceiving these relationships as pure logic rather than cumbersome algebra. The key heuristic: the extrinsic value of an ITM call must equal the price of the corresponding OTM put plus the cost of carry.</p>
+      <div class="highlight-box">
+        <strong>Primary Use Cases:</strong> Circumvent borrowing restrictions on hard-to-borrow equities, optimize capital efficiency under Portfolio Margin, manage directional risks dynamically, and extract risk-free arbitrage from momentary parity violations.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SYNTHETIC POSITIONS ═══════════════════════ -->
+<section class="strategy-section" id="synthetics-stock">
+  <div class="section-label">Synthetic Structures</div>
+  <h2 class="section-title">Synthetic Stock &amp; Option Positions</h2>
+  <p class="section-intro">By combining stocks, calls, and puts in prescribed ways, traders can perfectly replicate the delta, payoff, and risk profile of any natural position. These synthetics are deployed to gain exposure without the full capital outlay of stock ownership, bypass hard-to-borrow constraints, or isolate specific Greek exposures with greater capital efficiency.</p>
+
+  <div class="concept-image-wrap">
+    <img src="images/synthetic-equivalence.png" alt="Conceptual illustration of synthetic equivalence: two distinct paths — natural stock and a long call plus short put — converging to the same payoff outcome" loading="lazy">
+    <div class="concept-image-label">Concept Illustration — Natural vs. Synthetic Position Equivalence</div>
+  </div>
+
+  <div class="badge-strip">
+    <span class="badge badge-green"><span class="badge-label">Synth Long Stock:</span>Long Call + Short Put</span>
+    <span class="badge badge-red"><span class="badge-label">Synth Short Stock:</span>Long Put + Short Call</span>
+    <span class="badge badge-blue"><span class="badge-label">Synth Long Call:</span>Long Stock + Long Put</span>
+    <span class="badge badge-gold"><span class="badge-label">Synth Short Put:</span>Long Stock + Short Call</span>
+    <span class="badge badge-purple"><span class="badge-label">Synth Long Put:</span>Short Stock + Long Call</span>
+  </div>
+
+  <!-- SVG Payoff: Synthetic Long Stock vs Natural Long Stock -->
+  <div class="diagram-wrap">
+    <div class="diagram-title">Payoff Equivalence — Natural Long Stock vs. Synthetic Long Stock (Long Call + Short Put)</div>
+    <svg viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+      <rect width="600" height="180" fill="transparent"/>
+      <!-- Zero line -->
+      <line x1="30" y1="100" x2="580" y2="100" stroke="#30363d" stroke-width="1" stroke-dasharray="5,4"/>
+      <!-- Strike line at ATM (300) -->
+      <line x1="300" y1="20" x2="300" y2="165" stroke="#8b949e" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- Natural long stock line (solid blue) -->
+      <line x1="30" y1="168" x2="570" y2="18" stroke="#58a6ff" stroke-width="3" stroke-linecap="round"/>
+      <!-- Synthetic long stock line (dashed green, slightly offset for visibility) -->
+      <line x1="30" y1="170" x2="570" y2="20" stroke="#00d9a3" stroke-width="2" stroke-dasharray="8,4" stroke-linecap="round"/>
+      <!-- Labels -->
+      <text x="300" y="16" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">ATM Strike</text>
+      <text x="490" y="32" fill="#58a6ff" font-size="10" font-family="Inter">Natural Long Stock</text>
+      <text x="490" y="47" fill="#00d9a3" font-size="10" font-family="Inter">Synthetic (Long Call + Short Put)</text>
+      <!-- Profit / Loss labels -->
+      <text x="510" y="22" fill="#00d9a3" font-size="9" font-family="Inter" text-anchor="middle" font-weight="600">Unlimited Upside</text>
+      <text x="90" y="158" fill="#f85149" font-size="9" font-family="Inter" text-anchor="middle">Substantial Downside</text>
+      <text x="580" y="98" fill="#8b949e" font-size="9" font-family="Inter">0</text>
+      <text x="300" y="175" fill="#8b949e" font-size="9" font-family="Inter" text-anchor="middle">Underlying Price at Expiration</text>
+    </svg>
+  </div>
+
+  <div class="tabs" data-tabs="synth">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab(this,'synth-stock')">Synthetic Stock</button>
+      <button class="tab-btn" onclick="switchTab(this,'synth-legs')">Option Legs</button>
+      <button class="tab-btn" onclick="switchTab(this,'synth-vol')">Volatility Synthetics</button>
+      <button class="tab-btn" onclick="switchTab(this,'synth-cap')">Capital Efficiency</button>
+    </div>
+
+    <!-- Tab 1: Synthetic Stock Positions -->
+    <div class="tab-panel active" id="synth-stock">
+      <div class="content-grid">
+        <div class="content-card">
+          <h4>Synthetic Long Stock</h4>
+          <ul>
+            <li><strong>Construction:</strong> Long ATM Call + Short ATM Put (same strike, same expiry)</li>
+            <li><strong>Payoff:</strong> Identical to owning 100 shares — unlimited upside, substantial downside.</li>
+            <li><strong>Breakeven:</strong> Strike price ± net debit paid or credit received.</li>
+            <li><strong>Primary Use:</strong> Bullish exposure with dramatically reduced upfront capital vs. buying shares outright. Functions as a synthetic forward contract.</li>
+            <li><strong>Max Profit:</strong> Unlimited. <strong>Max Loss:</strong> Strike minus net debit (if stock → zero).</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Synthetic Short Stock</h4>
+          <ul>
+            <li><strong>Construction:</strong> Long ATM Put + Short ATM Call (same strike, same expiry)</li>
+            <li><strong>Payoff:</strong> Replicates a short-selling position exactly — profits point-for-point as the underlying declines.</li>
+            <li><strong>Max Profit:</strong> Strike minus net debit (stock → zero). <strong>Max Loss:</strong> Unlimited (stock can rise indefinitely).</li>
+            <li><strong>Primary Use:</strong> Bearish exposure on <strong>Hard-to-Borrow (HTB)</strong> equities where physical shares are unavailable or carry exorbitant borrow fees. The synthetic bypasses the borrow market entirely.</li>
+            <li>HTB borrow costs are naturally priced into the options via put-call parity — puts will trade at a massive premium to calls in HTB names.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Bullish Risk Reversal (Split-Strike Synthetic Long)</h4>
+          <ul>
+            <li><strong>Construction:</strong> Short OTM Put + Long OTM Call (different strikes)</li>
+            <li>Not a pure 100-delta equivalent — a "dead zone" exists between the strikes where P&amp;L is flat.</li>
+            <li>Capitalizes on <strong>volatility skew</strong> — OTM puts trade richer than equidistant OTM calls, so the put sale finances the call purchase.</li>
+            <li>Still carries substantial downside risk via the short put — not "zero cost" in terms of risk.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Protective Collar</h4>
+          <ul>
+            <li><strong>Construction:</strong> Long Stock + Long OTM Put + Short OTM Call</li>
+            <li>Combines natural stock ownership with a synthetic short stock overlay.</li>
+            <li>Sacrifices extreme upside (capped by the short call) to <strong>completely define downside risk</strong> (floored by the long put).</li>
+            <li>If the short call premium exactly offsets the long put cost: <strong>zero-cost collar</strong> — full downside protection at no out-of-pocket premium.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Synthetic Option Legs -->
+    <div class="tab-panel" id="synth-legs">
+      <div class="content-grid">
+        <div class="content-card">
+          <h4>Synthetic Long Call (Married Put)</h4>
+          <ul>
+            <li><strong>Construction:</strong> Long Stock + Long Put</li>
+            <li><strong>Payoff:</strong> Limited downside (floored at put strike) with theoretically unlimited upside. Geometrically identical to a long call.</li>
+            <li><strong>Primary Use:</strong> Investors holding long equity positions anticipating short-term turbulence can synthesize a long call to <strong>retain dividend and voting rights</strong> while instituting a hard floor on equity losses.</li>
+            <li><strong>Max Loss:</strong> Cost of stock + Put Premium − Strike Price.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Synthetic Short Put (Covered Call)</h4>
+          <ul>
+            <li><strong>Construction:</strong> Long Stock + Short Call</li>
+            <li><strong>Payoff:</strong> Limited profit (capped at short call strike + premium) with substantial downside below the stock's cost basis. Geometrically identical to a naked short put.</li>
+            <li><strong>Primary Use:</strong> Yield generation. Captures dividends and voting rights while harvesting volatility premiums and capping upside.</li>
+            <li><strong>Max Profit:</strong> Call Premium + (Strike − Purchase Price). <strong>Max Loss:</strong> Purchase Price − Call Premium.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Synthetic Long Put</h4>
+          <ul>
+            <li><strong>Construction:</strong> Short Stock + Long Call</li>
+            <li><strong>Payoff:</strong> Limited risk to the upside (capped by the call) with substantial profit potential to the downside.</li>
+            <li><strong>Primary Use:</strong> Allows traders to short a stock while <strong>definitively capping maximum risk</strong> in the event of an unexpected upside rally or short squeeze.</li>
+            <li><strong>Max Profit:</strong> Short Sale Price − Call Premium (if stock → zero). <strong>Max Loss:</strong> Strike − Short Sale Price + Call Premium.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Synthetic Short Call</h4>
+          <ul>
+            <li><strong>Construction:</strong> Short Stock + Short Put</li>
+            <li><strong>Payoff:</strong> Capped upside profit with unlimited downside risk if the stock rallies sharply.</li>
+            <li><strong>Primary Use:</strong> Executed when an investor wishes to mimic a naked short call but seeks to capitalize on an overvalued put premium or construct the position utilizing an existing short stock position.</li>
+            <li><strong>Max Profit:</strong> Put Premium + (Short Sale Price − Strike). <strong>Max Loss:</strong> Unlimited.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Synthetic Volatility -->
+    <div class="tab-panel" id="synth-vol">
+      <p>Standard long straddles and strangles profit from explosive expansion in realized volatility regardless of direction. These same payoff profiles can be synthetically replicated using combinations of stock and options — allowing traders to alter margin requirements, capture dividends, or isolate specific Greek exposures.</p>
+      <div class="content-grid">
+        <div class="content-card">
+          <h4>Long Put Synthetic Straddle</h4>
+          <ul>
+            <li><strong>Construction:</strong> Long 100 Shares + Long 2 ATM Puts</li>
+            <li>The first put mathematically combines with the long stock to <strong>synthesize a long call</strong>. The second put acts as the standard put leg.</li>
+            <li><strong>Payoff:</strong> Matches a standard long straddle exactly — limited loss at the strike, unlimited profit potential in both directions.</li>
+            <li>Often preferred because the long underlying position may capture <strong>dividends</strong> and is generally easier to execute than short-selling stock.</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h4>Short Call Synthetic Strangle</h4>
+          <ul>
+            <li><strong>Construction:</strong> Long 100 Shares + Short 1 OTM Call + Short 1 higher-strike OTM Call</li>
+            <li>The stock and the lower-strike short call synthesize a <strong>short put</strong>. The higher-strike short call remains as the naked call leg.</li>
+            <li><strong>Payoff:</strong> Perfectly mirrors a standard short strangle — profits from sideways consolidation and volatility contraction, carries unlimited risk if the underlying moves sharply in either direction.</li>
+            <li>Allows premium sellers to harvest the VRP while maintaining a long underlying position for dividend capture.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="highlight-box" style="margin-top:16px">
+        <strong>Greek Isolation:</strong> Synthetic volatility structures allow traders to dynamically alter their delta, gamma, theta, and vega exposures independently — achieving payoff profiles that would otherwise require more complex or capital-intensive natural positions.
+      </div>
+    </div>
+
+    <!-- Tab 4: Capital Efficiency Table -->
+    <div class="tab-panel" id="synth-cap">
+      <p>The most compelling argument for synthetic structures is <strong>capital efficiency</strong>. A comparative analysis of a $100 stock — where an investor seeks 100-delta bullish exposure to 100 shares — illustrates the stark disparity in capital requirements:</p>
+      <div class="matrix-wrap" style="margin-top:16px">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Attribute</th>
+              <th>Natural Long Stock (100 Shares)</th>
+              <th>Synthetic Long Stock (Long Call + Short Put)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Capital Outlay (Reg-T)</td>
+              <td class="cell-red">50% of Notional ($5,000 per $10k)</td>
+              <td class="cell-green">~20% of Underlying + Net Premium</td>
+            </tr>
+            <tr>
+              <td>Capital Outlay (Portfolio Margin)</td>
+              <td class="cell-yellow">15% of Notional ($1,500 per $10k)</td>
+              <td class="cell-green">Equivalent theoretical max loss (~$1,500)</td>
+            </tr>
+            <tr>
+              <td>Dividend Rights</td>
+              <td class="cell-green">Owner receives all discrete dividends</td>
+              <td>None — dividends priced into option premiums</td>
+            </tr>
+            <tr>
+              <td>Voting Rights</td>
+              <td class="cell-green">Full shareholder proxy voting rights</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <td>Borrowing Costs</td>
+              <td class="cell-yellow">Subject to standard broker margin loan rates</td>
+              <td class="cell-green">Implied synthetic rates; avoids standard margin interest</td>
+            </tr>
+            <tr>
+              <td>Expiration Constraints</td>
+              <td class="cell-green">Perpetual holding period (no expiration)</td>
+              <td class="cell-yellow">Bound by the maturity date of the option contracts</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="highlight-box" style="margin-top:16px">
+        <strong>Portfolio Margin Optimization:</strong> Under PM, both natural and synthetic long stock require approximately $1,500 per $10k notional (15% stress-test vector). However, the synthetic long <strong>generates interest on unutilized capital</strong>, optimizing total return on equity — a structural advantage invisible in Reg-T comparisons.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ ADVANCED ARBITRAGE SYNTHETICS ═══════════════════════ -->
+<section class="strategy-section" id="synthetics-arb">
+  <div class="section-label">Advanced Arbitrage</div>
+  <h2 class="section-title">Conversions, Box Spreads &amp; Jelly Rolls</h2>
+  <p class="section-intro">When put-call parity equations become unbalanced due to market inefficiencies, volatility dislocations, or term-structure anomalies, institutional quantitative desks deploy multi-leg arbitrage strategies to extract risk-free profits. These structures are entirely delta-neutral — their edge lies in capturing pricing discrepancies, not directional movement.</p>
+
+  <div class="content-grid">
+    <div class="content-card">
+      <h4>Conversions</h4>
+      <ul>
+        <li><strong>Construction:</strong> Long Stock + Short Call + Long Put (same strike K, same expiry)</li>
+        <li>Creates a synthetic short position against a natural long stock position.</li>
+        <li>Executed when options are mispriced such that the <strong>synthetic short trades at a premium to the natural stock</strong>.</li>
+        <li>The payoff is entirely locked: no matter where the stock settles at expiration, the trader delivers shares for exactly K.</li>
+        <li><strong>Profit condition:</strong> Net credit received exceeds the theoretical cost of carrying the trade to expiration.</li>
+        <li>The locked payoff means the position is immune to all subsequent market movement — pure riskless arbitrage.</li>
+      </ul>
+    </div>
+    <div class="content-card">
+      <h4>Reversals</h4>
+      <ul>
+        <li><strong>Construction:</strong> Short Stock + Long Call + Short Put (same strike K, same expiry)</li>
+        <li>The exact inverse of a conversion. Pairs a natural short stock position with a synthetic long stock overlay.</li>
+        <li>Executed when <strong>synthetic long positions are artificially inflated</strong> relative to the underlying.</li>
+        <li>Locks in the purchase price of the stock, securing arbitrage profits if the net debit is less than the theoretical forward carrying cost.</li>
+        <li>Structurally eliminates all market risk — the position is delta-zero, gamma-zero, and vega-zero at construction.</li>
+      </ul>
+    </div>
+    <div class="content-card">
+      <h4>Box Spreads</h4>
+      <ul>
+        <li><strong>Construction:</strong> Long Call (K₁) + Short Call (K₂) + Long Put (K₂) + Short Put (K₁) — a Bull Call Spread overlaid with a Bear Put Spread at identical strikes.</li>
+        <li>Achieves the exact outcome of a conversion/reversal but <strong>eliminates the need to hold physical stock</strong> — highly capital-efficient.</li>
+        <li>At expiration, the value is <strong>guaranteed to equal exactly K₂ − K₁</strong> regardless of where the underlying settles — making it a proxy for risk-free lending.</li>
+        <li>Widely used to secure <strong>margin financing at implied rates far below standard broker margin loan rates</strong> and to roll forward tax-efficient gains.</li>
+        <li>If initiated for a net debit less than the present value of the strike spread at the risk-free rate, an arbitrage opportunity exists.</li>
+      </ul>
+    </div>
+    <div class="content-card">
+      <h4>Jelly Rolls</h4>
+      <ul>
+        <li><strong>Construction:</strong> Synthetic Long Stock at near-term expiry (T₁) + Synthetic Short Stock at far-term expiry (T₂), same strike K. Four legs total: Long Call T₁, Short Put T₁, Short Call T₂, Long Put T₂.</li>
+        <li>While conversions and box spreads exploit mispricings across strikes within the same expiry, Jelly Rolls target <strong>temporal mispricings</strong> — arbitraging the term structure of interest rates and dividend expectations across different expiration dates.</li>
+        <li>Entirely market-neutral: delta-zero, gamma-zero, vega-zero, and theta-zero. Highly sensitive to <strong>rho</strong> (interest rates) and <strong>phi</strong> (dividends).</li>
+        <li><strong>Long Jelly Roll:</strong> deployed when a trader expects implied dividend pricing to widen vs. projected distributions.</li>
+        <li><strong>Short Jelly Roll:</strong> deployed when a trader anticipates quick market reversal of the mispricing.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:8px">
+    <strong>Institutional Context:</strong> These arbitrage strategies are executed primarily by market makers, high-frequency desks, and large institutional funds with the technology and execution speed to identify and capture the typically narrow profit windows before the market corrects. Retail traders interact with these structures most commonly via box spreads as a financing mechanism.
+  </div>
+</section>
+
+<!-- ═══════════════════════ RISKS OF SYNTHETIC STRATEGIES ═══════════════════════ -->
+<section class="strategy-section" id="synthetics-risks">
+  <div class="section-label">Risk Management</div>
+  <h2 class="section-title">Idiosyncratic Risks of Synthetic Strategies</h2>
+  <p class="section-intro">While the P&amp;L profiles of synthetics mirror their natural counterparts at expiration, the structural inclusion of American-style options introduces critical idiosyncratic risks that have no equivalent in natural positions. These risks must be actively monitored and mechanically managed.</p>
+
+  <div class="content-grid">
+    <div class="content-card">
+      <h4>Dividend Risk &amp; Early Assignment</h4>
+      <ul>
+        <li>Holders of American-style options have the right to exercise at any point prior to expiration. For synthetic structures involving <strong>short calls</strong> (Synthetic Short Stock, Synthetic Short Put / Covered Call), this creates severe dividend risk.</li>
+        <li>When an underlying trades ex-dividend, its spot price drops by the exact amount of the dividend. To capture this distribution, the owner of an ITM call may elect early assignment.</li>
+        <li><strong>The Threshold Rule:</strong> Early assignment is triggered when the impending dividend payment exceeds the remaining extrinsic (time) value of the ITM call option.</li>
+        <li><strong>The Consequence:</strong> The trader holding the short call leg is forced to deliver 100 shares at the strike price and is legally obligated to pay the dividend to the counterparty — severing the synthetic parity relationship.</li>
+        <li>A risk-defined synthetic short put, for example, is suddenly converted into an outright short stock position, exposing the trader to massive unhedged margin requirements.</li>
+      </ul>
+    </div>
+    <div class="content-card">
+      <h4>Pin Risk &amp; Expiration Dynamics</h4>
+      <ul>
+        <li>Pin risk emerges when the spot price of the underlying converges precisely with the strike price of a synthetic structure as expiration approaches.</li>
+        <li><strong>The Pinning Phenomenon:</strong> Market makers dynamically delta-hedge their vast gamma exposures near major option strikes. This aggressive buying and selling of the underlying "pins" the stock to the strike price at expiration.</li>
+        <li>Because option holders have a discretionary window <em>after</em> Friday market close to submit exercise instructions, the synthetic trader cannot definitively know if their short option leg will be assigned.</li>
+        <li><strong>Scenario:</strong> A trader holding a Synthetic Long Stock (Long $100 Call, Short $100 Put) with the stock closing at $100.01 faces total uncertainty. If the stock drops to $99.99 in after-hours trading, the short put moves ITM and may be aggressively assigned — the trader wakes up Monday unintentionally long 100 shares, exposed to a full weekend of unhedged market risk.</li>
+        <li><strong>Mitigation:</strong> Close or roll synthetic structures before Friday expiration when the underlying is trading within $0.50 of the short strike.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="warning-box" style="margin-top:20px">
+    <strong>Pre-Expiration Protocol for Synthetic Short Calls:</strong> Quantitative desks actively monitor ITM short call legs in the days preceding an ex-dividend date. If the dividend exceeds the call's remaining extrinsic value, the short call must be immediately rolled out in time (increasing extrinsic value) or up in strike — or bought back entirely to prevent involuntary assignment and the resulting synthetic parity violation.
+  </div>
+  <div class="warning-box" style="margin-top:12px">
+    <strong>Never Trade Calendar-Based Synthetics on Volatility Products:</strong> In volatility products such as VIX options, each distinct expiration cycle acts as its own unique underlying asset. This completely breaks the theoretical framework of synthetic parity — rendering the maximum loss of any calendar-based synthetic structure (Jelly Rolls, Diagonal Synthetics) entirely undefined.
   </div>
 </section>
 
@@ -1475,7 +2345,7 @@ nav .nav-section {
     <div style="font-weight:700;color:var(--text);margin-bottom:8px">Options Strategies: Statistical Edge Analysis</div>
     <p>This educational resource is based on quantitative academic research and historical backtesting data. All statistics cited are sourced from peer-reviewed studies, Cboe Global Markets publications, and publicly available index methodology documents. This material is for educational purposes only and does not constitute financial advice.</p>
     <div style="margin-top:16px;color:var(--text-muted);font-size:12px">
-      Key sources: Cboe CNDR &amp; BFLY Index Studies (1986–2015) &bull; Cboe PutWrite Index (PUT) 32-Year Historical Analysis &bull; Princeton Dataspace VRP Research &bull; OCC TIMS Portfolio Margin Methodology &bull; Differential Evolution BWB Optimization (SCIRP Journal)
+      Key sources: Cboe CNDR &amp; BFLY Index Studies (1986–2015) &bull; Cboe PutWrite Index (PUT) 32-Year Historical Analysis &bull; Princeton Dataspace VRP Research &bull; OCC TIMS Portfolio Margin Methodology &bull; Differential Evolution BWB Optimization (SCIRP Journal) &bull; Corporate Finance Institute — Synthetic Options &bull; Options Industry Council — Put-Call Parity &bull; Fidelity Investments — Synthetic Option Positions &amp; Assignment Risk &bull; MenthorQ — Mastering Put-Call Parity &bull; Charles Schwab — Risks of Options Assignment &bull; Cboe — Dividend Assignment Risk &bull; QuantConnect — Long Jelly Roll Strategy &bull; Interactive Brokers — Synthetic Forwards &amp; Options Intro &bull; Merrill Edge — Options Education &amp; Gamma Explained &bull; projectoption — Theta Decay Non-Linearity &bull; FASB ASC 815-10 Derivative Definition
     </div>
   </div>
 </footer>
